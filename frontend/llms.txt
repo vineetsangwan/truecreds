@@ -1,0 +1,47 @@
+# TrueCreds
+
+> TrueCreds is India's trusted loan comparison platform. We help users compare instant loan apps, personal loans, student loans, business loans, and more — all from RBI-registered NBFCs and banks.
+
+## What We Do
+
+TrueCreds is a free loan comparison and lead generation platform. We do NOT lend money directly. We compare loan products from 12+ RBI-registered lenders and match users with the best options based on their profile.
+
+## Key Pages
+
+- [Home](https://truecreds.in/) — Compare India's best loan apps
+- [Compare](https://truecreds.in/compare) — Side-by-side lender comparison
+- [EMI Calculator](https://truecreds.in/calculator) — Calculate monthly EMI
+- [Personal Loans](https://truecreds.in/loans/personal) — Best personal loan apps
+- [Instant Loans](https://truecreds.in/loans/instant) — Instant approval loans
+- [Student Loans](https://truecreds.in/loans/student) — Loans for students
+- [Business Loans](https://truecreds.in/loans/business) — SME and working capital loans
+- [Aadhaar Loans](https://truecreds.in/loans/aadhaar) — eKYC-based loans
+- [No CIBIL Loans](https://truecreds.in/loans/no-cibil) — Loans for low credit scores
+- [Blog](https://truecreds.in/blog) — Financial guides and loan tips
+- [Contact](https://truecreds.in/contact) — Get in touch
+
+## Lenders We Compare
+
+Navi, KreditBee, MoneyTap, PaySense, CASHe, LazyPay, Bajaj Finserv, mPokket, Credila, FlexiLoans — all RBI-registered NBFCs and banks.
+
+## Key Facts
+
+- Starting interest rate: 9.9% per annum
+- Loan range: ₹1,000 to ₹40,00,000
+- Average approval time: 30 minutes
+- CIBIL impact: Zero (soft inquiry only)
+- Users served: 1,20,000+
+
+## Affiliate Disclosure
+
+TrueCreds earns a referral commission from lenders when users apply through our platform. This does not affect our rankings, which are based purely on algorithmic scoring: interest rate (40%), approval speed (25%), CIBIL flexibility (20%), user ratings (15%).
+
+## Legal
+
+- [Privacy Policy](https://truecreds.in/legal/privacy)
+- [Disclaimer](https://truecreds.in/legal/disclaimer)
+
+## Contact
+
+- Website: https://truecreds.in
+- Email: privacy@truecreds.in
