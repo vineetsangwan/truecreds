@@ -73,17 +73,31 @@ function markdownToHtml(text) {
 function TableOfContents({ headings, activeId, onHeadingClick }) {
   if (!headings.length) return null;
   return (
-    <div className="rounded-2xl overflow-hidden" style={{ background: '#fff', border: '1px solid rgba(21,101,192,0.15)', boxShadow: '0 4px 20px rgba(21,101,192,0.08)' }}>
-      <div className="px-5 py-4 border-b" style={{ background: 'linear-gradient(135deg, #1565C0, #0288D1)', borderColor: 'transparent' }}>
-        <div className="text-[10px] font-mono text-white uppercase tracking-[0.2em] font-bold">Table of Contents</div>
+    <div style={{ background: '#fff', border: '1px solid rgba(21,101,192,0.15)', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 4px 20px rgba(21,101,192,0.08)' }}>
+      <div style={{ background: 'linear-gradient(135deg, #1565C0, #0288D1)', padding: '14px 20px' }}>
+        <div style={{ color: '#fff', fontSize: '10px', fontFamily: 'JetBrains Mono, monospace', textTransform: 'uppercase', letterSpacing: '0.2em', fontWeight: 700 }}>📋 Table of Contents</div>
       </div>
-      <nav className="p-3 space-y-1">
+      <nav style={{ padding: '12px' }}>
         {headings.map((h, i) => (
           <a key={i} href={`#${h.id}`}
             onClick={e => { e.preventDefault(); onHeadingClick && onHeadingClick(h.id); }}
-            className={`block text-xs py-2 px-3 rounded-lg transition-all no-underline cursor-pointer ${h.level === 3 ? 'ml-3' : ''} ${activeId === h.id ? 'font-semibold' : ''}`}
-            style={{ color: activeId === h.id ? '#1565C0' : '#3B5280', background: activeId === h.id ? 'rgba(21,101,192,0.08)' : 'transparent' }}>
-            {h.level === 3 && <span className="mr-1" style={{ color: '#94A3B8' }}>└</span>}
+            style={{
+              display: 'block',
+              fontSize: '12px',
+              padding: h.level === 3 ? '7px 12px 7px 24px' : '8px 12px',
+              borderRadius: '8px',
+              marginBottom: '2px',
+              textDecoration: 'none',
+              cursor: 'pointer',
+              fontWeight: activeId === h.id ? 600 : 400,
+              color: activeId === h.id ? '#1565C0' : '#3B5280',
+              background: activeId === h.id ? 'rgba(21,101,192,0.08)' : 'transparent',
+              borderLeft: activeId === h.id && h.level === 2 ? '3px solid #1565C0' : '3px solid transparent',
+              transition: 'all 0.15s ease',
+            }}
+            onMouseEnter={e => { if (activeId !== h.id) e.currentTarget.style.background = 'rgba(21,101,192,0.04)'; }}
+            onMouseLeave={e => { if (activeId !== h.id) e.currentTarget.style.background = 'transparent'; }}>
+            {h.level === 3 && <span style={{ color: '#94A3B8', marginRight: '4px', fontSize: '10px' }}>└</span>}
             {h.text}
           </a>
         ))}
@@ -238,20 +252,20 @@ export default function BlogPost() {
       <div style={{ background: '#fff', display: 'flex', height: 'calc(100vh - 64px)', position: 'sticky', top: '64px', borderTop: '1px solid rgba(21,101,192,0.08)' }}>
 
         {/* LEFT SIDEBAR — fixed, never scrolls */}
-        <aside className="hidden lg:flex flex-col" style={{ width: '240px', flexShrink: 0, height: '100%', overflowY: 'auto', borderRight: '1px solid rgba(21,101,192,0.1)', scrollbarWidth: 'none' }}>
+        <aside className="hidden lg:flex flex-col" style={{ width: '300px', flexShrink: 0, height: '100%', overflowY: 'auto', borderRight: '1px solid rgba(21,101,192,0.1)', scrollbarWidth: 'none', background: '#F8FAFF' }}>
           <div className="p-5 space-y-5">
             <TableOfContents headings={headings} activeId={activeId} onHeadingClick={scrollToHeading} />
-            <div className="rounded-2xl p-4 text-center" style={{ background: 'linear-gradient(135deg, #1565C0, #0288D1)', boxShadow: '0 8px 24px rgba(21,101,192,0.2)' }}>
-              <div className="text-2xl mb-2">⚖️</div>
-              <div className="font-bold text-sm mb-1 text-white" style={{ fontFamily: 'Outfit,sans-serif' }}>Compare Loans</div>
-              <p className="text-xs mb-3 leading-relaxed" style={{ color: 'rgba(255,255,255,0.8)' }}>Find the lowest rate</p>
-              <Link to="/compare" className="block text-center font-bold text-sm py-2 px-3 rounded-lg" style={{ background: '#fff', color: '#1565C0' }}>Compare Now →</Link>
+            <div style={{ background: 'linear-gradient(135deg, #0D47A1, #1565C0, #0288D1)', borderRadius: '16px', padding: '20px', textAlign: 'center', boxShadow: '0 8px 32px rgba(21,101,192,0.25)' }}>
+              <div style={{ fontSize: '32px', marginBottom: '10px' }}>⚡</div>
+              <div style={{ color: '#fff', fontFamily: 'Outfit,sans-serif', fontWeight: 800, fontSize: '15px', marginBottom: '6px' }}>Compare Loan Apps</div>
+              <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: '12px', lineHeight: 1.6, marginBottom: '14px' }}>See which lender gives you the best rate for your CIBIL score</p>
+              <Link to="/compare" style={{ display: 'block', background: '#fff', color: '#1565C0', fontWeight: 700, fontSize: '13px', padding: '10px 16px', borderRadius: '10px', textDecoration: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}>Compare All Lenders →</Link>
             </div>
           </div>
         </aside>
 
         {/* CENTER — ONLY this scrolls */}
-        <main style={{ flex: 1, minWidth: 0, height: '100%', overflowY: 'auto', padding: '40px 48px' }} ref={contentRef}>
+        <main style={{ flex: 1, minWidth: 0, height: '100%', overflowY: 'auto', padding: '48px 64px', background: '#fff' }} ref={contentRef}>
 
           {/* Mobile TOC */}
           {headings.length > 0 && (
@@ -315,16 +329,16 @@ export default function BlogPost() {
         </main>
 
         {/* RIGHT SIDEBAR — fixed, never scrolls */}
-        <aside className="hidden lg:flex flex-col" style={{ width: '260px', flexShrink: 0, height: '100%', overflowY: 'auto', borderLeft: '1px solid rgba(21,101,192,0.1)', scrollbarWidth: 'none' }}>
+        <aside className="hidden lg:flex flex-col" style={{ width: '320px', flexShrink: 0, height: '100%', overflowY: 'auto', borderLeft: '1px solid rgba(21,101,192,0.1)', scrollbarWidth: 'none', background: '#F8FAFF' }}>
           <div className="p-5 space-y-5">
             <EligibilityForm compact />
 
             {/* QUICK LINKS */}
-            <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid rgba(21,101,192,0.12)', boxShadow: '0 4px 20px rgba(21,101,192,0.06)' }}>
-              <div className="px-5 py-3 border-b" style={{ background: 'linear-gradient(135deg, #1565C0, #0288D1)', borderColor: 'transparent' }}>
-                <div className="text-[10px] font-mono text-white uppercase tracking-[0.2em] font-bold">Quick Links</div>
+            <div style={{ background: '#fff', border: '1px solid rgba(21,101,192,0.12)', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 4px 20px rgba(21,101,192,0.06)' }}>
+              <div style={{ background: 'linear-gradient(135deg, #1565C0, #0288D1)', padding: '12px 20px' }}>
+                <div style={{ color: '#fff', fontSize: '10px', fontFamily: 'JetBrains Mono,monospace', textTransform: 'uppercase', letterSpacing: '0.2em', fontWeight: 700 }}>🔗 Quick Links</div>
               </div>
-              <div className="p-3 space-y-1" style={{ background: '#fff' }}>
+              <div style={{ padding: '8px' }}>
                 {[
                   { to: '/compare', label: 'Compare All Lenders', icon: '⚖️' },
                   { to: '/calculator', label: 'EMI Calculator', icon: '🧮' },
@@ -333,28 +347,37 @@ export default function BlogPost() {
                   { to: '/loans/no-cibil', label: 'No CIBIL Loans', icon: '📊' },
                 ].map(link => (
                   <Link key={link.to} to={link.to}
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs no-underline transition-all"
-                    style={{ color: '#3B5280' }}
-                    onMouseEnter={e => e.currentTarget.style.background = 'rgba(21,101,192,0.06)'}
-                    onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                    <span>{link.icon}</span>
-                    <span className="flex-1">{link.label}</span>
-                    <span style={{ color: '#1565C0' }}>→</span>
+                    style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', borderRadius: '10px', textDecoration: 'none', color: '#3B5280', fontSize: '13px', transition: 'all 0.15s' }}
+                    onMouseEnter={e => { e.currentTarget.style.background = 'rgba(21,101,192,0.06)'; e.currentTarget.style.color = '#1565C0'; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#3B5280'; }}>
+                    <span style={{ fontSize: '16px', width: '24px', textAlign: 'center' }}>{link.icon}</span>
+                    <span style={{ flex: 1, fontWeight: 500 }}>{link.label}</span>
+                    <span style={{ color: '#1565C0', fontSize: '12px' }}>→</span>
                   </Link>
                 ))}
               </div>
             </div>
 
             {/* RATE TICKER */}
-            <div className="rounded-2xl p-4" style={{ background: '#fff', border: '1.5px solid rgba(21,101,192,0.2)', boxShadow: '0 4px 20px rgba(21,101,192,0.08)' }}>
-              <div className="text-[10px] font-mono uppercase tracking-wider mb-3 font-bold" style={{ color: '#1565C0' }}>Today's Best Rates</div>
-              {[['Navi', '9.9%'], ['Bajaj', '11%'], ['MoneyTap', '13%']].map(([name, rate]) => (
-                <div key={name} className="flex justify-between items-center py-2 border-b last:border-0" style={{ borderColor: 'rgba(21,101,192,0.08)' }}>
-                  <span className="text-xs" style={{ color: '#3B5280' }}>{name}</span>
-                  <span className="text-xs font-mono font-bold" style={{ color: '#1565C0' }}>{rate} p.a.</span>
+            <div style={{ background: '#fff', border: '1.5px solid rgba(21,101,192,0.15)', borderRadius: '16px', padding: '18px', boxShadow: '0 4px 20px rgba(21,101,192,0.06)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
+                <span style={{ fontSize: '16px' }}>📈</span>
+                <span style={{ color: '#1565C0', fontSize: '11px', fontFamily: 'JetBrains Mono,monospace', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 700 }}>Today's Best Rates</span>
+              </div>
+              {[['Navi', '9.9%', '⭐'], ['Bajaj Finserv', '11%', '🏛️'], ['MoneyTap', '13%', '💧']].map(([name, rate, icon]) => (
+                <div key={name} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: '1px solid rgba(21,101,192,0.06)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ fontSize: '14px' }}>{icon}</span>
+                    <span style={{ fontSize: '13px', color: '#3B5280', fontWeight: 500 }}>{name}</span>
+                  </div>
+                  <span style={{ fontSize: '13px', fontFamily: 'JetBrains Mono,monospace', fontWeight: 700, color: '#1565C0' }}>{rate} p.a.</span>
                 </div>
               ))}
-              <Link to="/compare" className="btn-ghost text-xs px-3 py-2 w-full justify-center mt-3 block text-center">See All Rates →</Link>
+              <Link to="/compare" style={{ display: 'block', textAlign: 'center', marginTop: '14px', padding: '9px', border: '1.5px solid #1565C0', borderRadius: '10px', color: '#1565C0', fontSize: '13px', fontWeight: 600, textDecoration: 'none', transition: 'all 0.15s' }}
+                onMouseEnter={e => { e.currentTarget.style.background = '#1565C0'; e.currentTarget.style.color = '#fff'; }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#1565C0'; }}>
+                See All Rates →
+              </Link>
             </div>
 
           </div>
