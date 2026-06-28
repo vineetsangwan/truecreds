@@ -36,7 +36,7 @@ function parseTable(block) {
   const rows = lines.slice(2).map(parseRow);
   const thead = `<thead><tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr></thead>`;
   const tbody = `<tbody>${rows.map(r => `<tr>${r.map(c => `<td>${c}</td>`).join('')}</tr>`).join('')}</tbody>`;
-  return `<table>${thead}${tbody}</table>`;
+  return `<div style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:1.5rem 0"><table style="min-width:500px;width:100%;border-collapse:collapse">${thead}${tbody}</table></div>`;
 }
 
 function markdownToHtml(text) {
@@ -380,7 +380,8 @@ export default function BlogPost() {
         .blog-content pre { background: #F0F6FF; border: 1px solid rgba(21,101,192,0.15); border-radius: 12px; padding: 1.25rem; overflow-x: auto; margin: 1.5rem 0; }
         .blog-content pre code { background: none; padding: 0; color: #334155; }
         .blog-content img { width: 100%; border-radius: 12px; margin: 1.5rem 0; border: 1px solid rgba(21,101,192,0.12); }
-        .blog-content table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: 14px; }
+        .blog-content table { width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: 14px; min-width: 500px; }
+        .blog-content table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
         .blog-content th { background: linear-gradient(135deg, #1565C0, #0288D1); color: #fff; padding: 10px 14px; text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; }
         .blog-content td { padding: 10px 14px; border-bottom: 1px solid rgba(21,101,192,0.08); color: #334155; }
         .blog-content tr:hover td { background: rgba(21,101,192,0.03); }
