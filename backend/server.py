@@ -13,7 +13,12 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(mess
 logger = logging.getLogger("truecreds")
 
 app = FastAPI(title="TrueCreds API", version="2.0.0")
-app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
+app.add_middleware(CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"]
+)
 
 MONGO_URL          = os.getenv("MONGO_URL", "mongodb://localhost:27017")
 DB_NAME            = os.getenv("DB_NAME", "truecreds")
@@ -31,15 +36,7 @@ db = client[DB_NAME]
 security = HTTPBearer(auto_error=False)
 
 # ─── MODELS ───────────────────────────────────────────────────────────────────
-app.add_middleware(CORSMiddleware,
-    allow_origins=[
-        "https://truecreds.in",
-        "https://www.truecreds.in"
-    ],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"]
-)
+
 class LeadCreate(BaseModel):
     model_config = ConfigDict(extra="ignore")
     full_name: str
@@ -78,6 +75,44 @@ class WpPostCreate(BaseModel):
     status: Optional[str] = "publish"
     categories: Optional[List[int]] = None
     tags: Optional[List[int]] = None
+
+class BlogPostCreate(BaseModel):
+    title: str
+    slug: str
+    excerpt: Optional[str] = ""
+    content: str
+    category: Optional[str] = "General"
+    cover_image: Optional[str] = ""
+    read_time: Optional[str] = "5 min"
+    status: Optional[str] = "publish"
+
+class BlogPostUpdate(BaseModel):
+    title: Optional[str] = None
+    slug: Optional[str] = None
+    excerpt: Optional[str] = None
+    content: Optional[str] = None
+    category: Optional[str] = None
+    cover_image: Optional[str] = None
+    read_time: Optional[str] = None
+    status: Optional[str] = None
+
+class PageSection(BaseModel):
+    type: str
+    data: dict
+
+class DynamicPageCreate(BaseModel):
+    title: str
+    slug: str
+    meta_description: Optional[str] = None
+    status: Optional[str] = "published"
+    sections: Optional[List[PageSection]] = []
+
+class DynamicPageUpdate(BaseModel):
+    title: Optional[str] = None
+    slug: Optional[str] = None
+    meta_description: Optional[str] = None
+    status: Optional[str] = None
+    sections: Optional[List[PageSection]] = None
 
 # ─── AUTH ─────────────────────────────────────────────────────────────────────
 
@@ -146,14 +181,12 @@ def _build_wp_headers(cfg: dict) -> dict:
     return headers
 
 def _get_wp_api_url(base_url: str) -> str:
-    """Return correct API URL for both WordPress.com and self-hosted."""
     if "wordpress.com" in base_url:
         site = base_url.replace("https://", "").replace("http://", "").rstrip("/")
         return f"https://public-api.wordpress.com/wp/v2/sites/{site}/posts"
     return f"{base_url.rstrip('/')}/wp-json/wp/v2/posts"
 
 def _normalize_wp_post(p: dict) -> dict:
-    """Convert a WP API post object to our schema."""
     img = ""
     try:
         img = p["_embedded"]["wp:featuredmedia"][0]["source_url"]
@@ -230,6 +263,10 @@ async def send_lead_notification(lead: dict):
 
 # ─── PUBLIC ROUTES ────────────────────────────────────────────────────────────
 
+@app.get("/")
+async def root():
+    return {"status": "ok", "service": "TrueCreds API", "version": "2.0.0"}
+
 @app.get("/api/")
 async def health():
     return {"status": "ok", "service": "TrueCreds API", "version": "2.0.0"}
@@ -244,24 +281,18 @@ async def get_loan_apps(
     sort: Optional[str] = "rating",
 ):
     q = {}
-    if category:
-        q["categories"] = category
-    if location:
-        q["locations"] = location
-    if min_amount:
-        q["loan_amount_max"] = {"$gte": min_amount}
-    if max_rate:
-        q["interest_rate_min"] = {"$lte": max_rate}
-    if min_cibil:
-        q["min_cibil"] = {"$lte": min_cibil}
+    if category: q["categories"] = category
+    if location: q["locations"] = location
+    if min_amount: q["loan_amount_max"] = {"$gte": min_amount}
+    if max_rate: q["interest_rate_min"] = {"$lte": max_rate}
+    if min_cibil: q["min_cibil"] = {"$lte": min_cibil}
     sort_field = {"rate": ("interest_rate_min", 1), "amount": ("loan_amount_max", -1)}.get(sort, ("rating", -1))
     return await db.loan_apps.find(q, {"_id": 0}).sort(*sort_field).to_list(100)
 
 @app.get("/api/loan-apps/{loan_id}")
 async def get_loan_app(loan_id: str):
     loan = await db.loan_apps.find_one({"id": loan_id}, {"_id": 0})
-    if not loan:
-        raise HTTPException(404, "Not found")
+    if not loan: raise HTTPException(404, "Not found")
     return loan
 
 @app.post("/api/leads")
@@ -269,12 +300,7 @@ async def create_lead(lead: LeadCreate, background_tasks: BackgroundTasks):
     if not re.match(r"^[6-9]\d{9}$", lead.mobile):
         raise HTTPException(422, "Invalid Indian mobile number")
     d = lead.model_dump(exclude_none=True)
-    d.update({
-        "id": str(uuid.uuid4()),
-        "source": "website",
-        "status": "new",
-        "created_at": datetime.now(timezone.utc).isoformat(),
-    })
+    d.update({"id": str(uuid.uuid4()), "source": "website", "status": "new", "created_at": datetime.now(timezone.utc).isoformat()})
     await db.leads.insert_one(d)
     background_tasks.add_task(send_lead_notification, d)
     return {"success": True, "id": d["id"]}
@@ -319,8 +345,7 @@ async def get_blog_post(slug: str):
         except Exception as e:
             logger.warning(f"WP single post failed: {e}")
     post = await db.blog_posts.find_one({"slug": slug}, {"_id": 0})
-    if not post:
-        raise HTTPException(404, "Post not found")
+    if not post: raise HTTPException(404, "Post not found")
     return post
 
 # ─── AUTH ROUTES ──────────────────────────────────────────────────────────────
@@ -353,8 +378,7 @@ async def get_leads(q: Optional[str] = None, status_filter: Optional[str] = None
 @app.delete("/api/leads/{lead_id}")
 async def delete_lead(lead_id: str, u: str = Depends(verify_token)):
     r = await db.leads.delete_one({"id": lead_id})
-    if r.deleted_count == 0:
-        raise HTTPException(404, "Not found")
+    if r.deleted_count == 0: raise HTTPException(404, "Not found")
     return {"success": True}
 
 @app.patch("/api/leads/{lead_id}")
@@ -385,11 +409,9 @@ async def test_wp(body: WpTestRequest, u: str = Depends(verify_token)):
     base_url = (body.base_url or cfg.get("base_url", "")).rstrip("/")
     if not base_url:
         return {"ok": False, "logs": ["No URL provided"], "post_count": 0, "latency_ms": 0}
-
     import requests
     start = time.time()
     logs = []
-
     try:
         is_wpcom = "wordpress.com" in base_url
         if is_wpcom:
@@ -399,37 +421,21 @@ async def test_wp(body: WpTestRequest, u: str = Depends(verify_token)):
         else:
             api_url = f"{base_url}/wp-json/wp/v2/posts"
             logs.append(f"Self-hosted WordPress: {base_url}")
-
         r = requests.get(api_url, params={"per_page": 5}, timeout=10)
         lat = int((time.time() - start) * 1000)
         logs.append(f"HTTP {r.status_code} — {lat}ms")
-        logs.append(f"CORS: {r.headers.get('Access-Control-Allow-Origin', 'not set')}")
-
         if r.ok:
             posts = r.json()
             pc = len(posts)
             logs.append(f"Posts fetched: {pc}")
             if pc > 0:
-                title = posts[0].get("title", {}).get("rendered", "")[:60]
-                logs.append(f"Latest post: {title}")
-            else:
-                logs.append("No posts yet — publish a post on WordPress first")
-
-            await db.wp_config.update_one(
-                {},
-                {"$set": {"last_tested": datetime.now(timezone.utc).isoformat(), "last_status": "ok", "last_post_count": pc, "last_error": ""}},
-                upsert=True,
-            )
+                logs.append(f"Latest post: {posts[0].get('title', {}).get('rendered', '')[:60]}")
+            await db.wp_config.update_one({}, {"$set": {"last_tested": datetime.now(timezone.utc).isoformat(), "last_status": "ok", "last_post_count": pc}}, upsert=True)
             logs.append("Connection successful!")
             return {"ok": True, "logs": logs, "post_count": pc, "latency_ms": lat}
         else:
-            logs.append(f"Failed with status {r.status_code}: {r.text[:150]}")
+            logs.append(f"Failed: {r.status_code}")
             return {"ok": False, "logs": logs, "post_count": 0, "latency_ms": lat}
-
-    except requests.Timeout:
-        lat = int((time.time() - start) * 1000)
-        logs.append(f"Connection timed out after {lat}ms")
-        return {"ok": False, "logs": logs, "post_count": 0, "latency_ms": lat}
     except Exception as e:
         lat = int((time.time() - start) * 1000)
         logs.append(f"Error: {str(e)}")
@@ -464,34 +470,64 @@ async def create_wp_post(body: WpPostCreate, u: str = Depends(verify_token)):
         raise HTTPException(400, "WordPress auth not configured")
     import requests
     payload = {"title": body.title, "content": body.content, "status": body.status or "publish"}
-    if body.excerpt:
-        payload["excerpt"] = body.excerpt
-    r = requests.post(
-        f"{cfg['base_url'].rstrip('/')}/wp-json/wp/v2/posts",
-        json=payload,
-        headers=_build_wp_headers(cfg),
-        timeout=15,
-    )
-    if not r.ok:
-        raise HTTPException(r.status_code, r.text[:200])
+    if body.excerpt: payload["excerpt"] = body.excerpt
+    r = requests.post(f"{cfg['base_url'].rstrip('/')}/wp-json/wp/v2/posts", json=payload, headers=_build_wp_headers(cfg), timeout=15)
+    if not r.ok: raise HTTPException(r.status_code, r.text[:200])
     return r.json()
 
 @app.get("/api/wp/categories")
 async def get_wp_categories(u: str = Depends(verify_token)):
     cfg = await db.wp_config.find_one({}, {"_id": 0})
-    if not cfg or not cfg.get("base_url"):
-        return []
+    if not cfg or not cfg.get("base_url"): return []
     import requests
     try:
-        r = requests.get(
-            f"{cfg['base_url'].rstrip('/')}/wp-json/wp/v2/categories",
-            params={"per_page": 100},
-            headers=_build_wp_headers(cfg),
-            timeout=8,
-        )
+        r = requests.get(f"{cfg['base_url'].rstrip('/')}/wp-json/wp/v2/categories", params={"per_page": 100}, headers=_build_wp_headers(cfg), timeout=8)
         return r.json() if r.ok else []
     except Exception:
         return []
+
+# ─── ADMIN: BLOG CRUD ─────────────────────────────────────────────────────────
+
+@app.get("/api/admin/blog/posts")
+async def admin_get_blog_posts(u: str = Depends(verify_token)):
+    posts = await db.blog_posts.find({}, {"_id": 0}).sort("published_at", -1).to_list(200)
+    return posts
+
+@app.post("/api/admin/blog/posts")
+async def admin_create_blog_post(body: BlogPostCreate, u: str = Depends(verify_token)):
+    existing = await db.blog_posts.find_one({"slug": body.slug})
+    if existing: raise HTTPException(400, "A post with this slug already exists")
+    post = {
+        "id": str(uuid.uuid4()),
+        "title": body.title,
+        "slug": body.slug,
+        "excerpt": body.excerpt,
+        "content": body.content,
+        "category": body.category,
+        "cover_image": body.cover_image,
+        "read_time": body.read_time,
+        "status": body.status,
+        "source": "local",
+        "published_at": datetime.now(timezone.utc).isoformat(),
+        "updated_at": datetime.now(timezone.utc).isoformat(),
+    }
+    await db.blog_posts.insert_one(post)
+    post.pop("_id", None)
+    return post
+
+@app.put("/api/admin/blog/posts/{post_id}")
+async def admin_update_blog_post(post_id: str, body: BlogPostUpdate, u: str = Depends(verify_token)):
+    upd = {k: v for k, v in body.model_dump().items() if v is not None}
+    upd["updated_at"] = datetime.now(timezone.utc).isoformat()
+    result = await db.blog_posts.update_one({"id": post_id}, {"$set": upd})
+    if result.matched_count == 0: raise HTTPException(404, "Post not found")
+    return {"success": True}
+
+@app.delete("/api/admin/blog/posts/{post_id}")
+async def admin_delete_blog_post(post_id: str, u: str = Depends(verify_token)):
+    result = await db.blog_posts.delete_one({"id": post_id})
+    if result.deleted_count == 0: raise HTTPException(404, "Post not found")
+    return {"success": True}
 
 # ─── ADMIN: EMAIL + STATUS ────────────────────────────────────────────────────
 
@@ -500,15 +536,9 @@ async def test_email(u: str = Depends(verify_token)):
     if not RESEND_API_KEY:
         return {"ok": False, "error": "RESEND_API_KEY not set in .env"}
     await send_lead_notification({
-        "full_name": "Test User",
-        "mobile": "9999999999",
-        "email": "test@truecreds.in",
-        "loan_amount": 250000,
-        "employment_type": "Salaried",
-        "city": "Mumbai",
-        "created_at": datetime.now(timezone.utc).isoformat(),
-        "source": "test",
-        "status": "new",
+        "full_name": "Test User", "mobile": "9999999999", "email": "test@truecreds.in",
+        "loan_amount": 250000, "employment_type": "Salaried", "city": "Mumbai",
+        "created_at": datetime.now(timezone.utc).isoformat(), "source": "test", "status": "new",
     })
     return {"ok": True, "message": f"Test email sent to {ADMIN_NOTIFY_EMAIL}"}
 
@@ -521,32 +551,10 @@ async def system_status(u: str = Depends(verify_token)):
         db_ok = False
     wp = await db.wp_config.find_one({}, {"_id": 0}) or {}
     return {
-        "database": {
-            "connected": db_ok,
-            "name": DB_NAME,
-            "host": MONGO_URL.split("@")[-1][:30] if "@" in MONGO_URL else "localhost",
-        },
-        "wordpress": {
-            "active": wp.get("active", False),
-            "base_url": wp.get("base_url", ""),
-            "last_status": wp.get("last_status", ""),
-            "last_tested": wp.get("last_tested", ""),
-            "post_count": wp.get("last_post_count", 0),
-            "has_auth": bool(wp.get("wp_username")),
-        },
-        "email": {
-            "configured": bool(RESEND_API_KEY),
-            "from": SENDER_EMAIL,
-            "to": ADMIN_NOTIFY_EMAIL,
-        },
-        "counters": {
-            "total_leads": await db.leads.count_documents({}),
-            "loan_apps": await db.loan_apps.count_documents({}),
-            "blog_posts": await db.blog_posts.count_documents({}),
-            "contacts": await db.contacts.count_documents({}),
-            "version": "2.0.0",
-            "service": "running",
-        },
+        "database": {"connected": db_ok, "name": DB_NAME, "host": MONGO_URL.split("@")[-1][:30] if "@" in MONGO_URL else "localhost"},
+        "wordpress": {"active": wp.get("active", False), "base_url": wp.get("base_url", ""), "last_status": wp.get("last_status", ""), "last_tested": wp.get("last_tested", ""), "post_count": wp.get("last_post_count", 0), "has_auth": bool(wp.get("wp_username"))},
+        "email": {"configured": bool(RESEND_API_KEY), "from": SENDER_EMAIL, "to": ADMIN_NOTIFY_EMAIL},
+        "counters": {"total_leads": await db.leads.count_documents({}), "loan_apps": await db.loan_apps.count_documents({}), "blog_posts": await db.blog_posts.count_documents({}), "contacts": await db.contacts.count_documents({}), "version": "2.0.0", "service": "running"},
     }
 
 if __name__ == "__main__":
@@ -555,50 +563,24 @@ if __name__ == "__main__":
 
 # ─── DYNAMIC PAGES ────────────────────────────────────────────────────────────
 
-class PageSection(BaseModel):
-    type: str  # hero | text | cards | cta | faq | stats
-    data: dict
-
-class DynamicPageCreate(BaseModel):
-    title: str
-    slug: str
-    meta_description: Optional[str] = None
-    status: Optional[str] = "published"  # published | draft
-    sections: Optional[List[PageSection]] = []
-
-class DynamicPageUpdate(BaseModel):
-    title: Optional[str] = None
-    slug: Optional[str] = None
-    meta_description: Optional[str] = None
-    status: Optional[str] = None
-    sections: Optional[List[PageSection]] = None
-
-# PUBLIC: get a published page by slug
 @app.get("/api/pages/{slug}")
 async def get_page(slug: str):
     page = await db.dynamic_pages.find_one({"slug": slug, "status": "published"}, {"_id": 0})
-    if not page:
-        raise HTTPException(404, "Page not found")
+    if not page: raise HTTPException(404, "Page not found")
     return page
 
-# PUBLIC: list all published pages (for sitemap/nav)
 @app.get("/api/pages")
 async def list_pages_public():
-    pages = await db.dynamic_pages.find({"status": "published"}, {"_id": 0, "sections": 0}).sort("created_at", -1).to_list(100)
-    return pages
+    return await db.dynamic_pages.find({"status": "published"}, {"_id": 0, "sections": 0}).sort("created_at", -1).to_list(100)
 
-# ADMIN: list all pages including drafts
 @app.get("/api/admin/pages")
 async def list_pages(u: str = Depends(verify_token)):
-    pages = await db.dynamic_pages.find({}, {"_id": 0}).sort("created_at", -1).to_list(200)
-    return pages
+    return await db.dynamic_pages.find({}, {"_id": 0}).sort("created_at", -1).to_list(200)
 
-# ADMIN: create page
 @app.post("/api/admin/pages")
 async def create_page(body: DynamicPageCreate, u: str = Depends(verify_token)):
     existing = await db.dynamic_pages.find_one({"slug": body.slug})
-    if existing:
-        raise HTTPException(400, f"Slug '{body.slug}' already exists")
+    if existing: raise HTTPException(400, f"Slug '{body.slug}' already exists")
     page = body.model_dump()
     page["id"] = str(uuid.uuid4())
     page["created_at"] = datetime.now(timezone.utc).isoformat()
@@ -607,7 +589,6 @@ async def create_page(body: DynamicPageCreate, u: str = Depends(verify_token)):
     await db.dynamic_pages.insert_one(page)
     return {"success": True, "id": page["id"], "slug": page["slug"]}
 
-# ADMIN: update page
 @app.put("/api/admin/pages/{page_id}")
 async def update_page(page_id: str, body: DynamicPageUpdate, u: str = Depends(verify_token)):
     upd = {k: v for k, v in body.model_dump().items() if v is not None}
@@ -615,24 +596,19 @@ async def update_page(page_id: str, body: DynamicPageUpdate, u: str = Depends(ve
     if "sections" in body.model_dump() and body.sections is not None:
         upd["sections"] = [s.model_dump() for s in body.sections]
     result = await db.dynamic_pages.update_one({"id": page_id}, {"$set": upd})
-    if result.matched_count == 0:
-        raise HTTPException(404, "Page not found")
+    if result.matched_count == 0: raise HTTPException(404, "Page not found")
     return {"success": True}
 
-# ADMIN: delete page
 @app.delete("/api/admin/pages/{page_id}")
 async def delete_page(page_id: str, u: str = Depends(verify_token)):
     result = await db.dynamic_pages.delete_one({"id": page_id})
-    if result.deleted_count == 0:
-        raise HTTPException(404, "Page not found")
+    if result.deleted_count == 0: raise HTTPException(404, "Page not found")
     return {"success": True}
 
-# ADMIN: toggle publish/draft
 @app.patch("/api/admin/pages/{page_id}/status")
 async def toggle_page_status(page_id: str, u: str = Depends(verify_token)):
     page = await db.dynamic_pages.find_one({"id": page_id})
-    if not page:
-        raise HTTPException(404, "Page not found")
+    if not page: raise HTTPException(404, "Page not found")
     new_status = "draft" if page.get("status") == "published" else "published"
     await db.dynamic_pages.update_one({"id": page_id}, {"$set": {"status": new_status, "updated_at": datetime.now(timezone.utc).isoformat()}})
     return {"success": True, "status": new_status}
