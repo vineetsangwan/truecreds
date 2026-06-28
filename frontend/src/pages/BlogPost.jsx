@@ -28,17 +28,23 @@ function injectHeadingIds(html) {
 function markdownToHtml(text) {
   if (!text) return '';
   if (text.trim().startsWith('<')) return injectHeadingIds(text);
-  return text
+  let html = text
     .replace(/^### (.+)$/gm, '<h3>$1</h3>')
     .replace(/^## (.+)$/gm, '<h2>$1</h2>')
     .replace(/^# (.+)$/gm, '<h1>$1</h1>')
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
     .replace(/\*(.+?)\*/g, '<em>$1</em>')
+    .replace(/`(.+?)`/g, '<code>$1</code>')
+    .replace(/^> (.+)$/gm, '<blockquote>$1</blockquote>')
+    .replace(/^---$/gm, '<hr>')
+    .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" />')
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
     .replace(/^- (.+)$/gm, '<li>$1</li>')
     .replace(/(<li>.*<\/li>\n?)+/g, s => `<ul>${s}</ul>`)
     .replace(/\n\n/g, '</p><p>')
     .trim()
     .replace(/^(.+)$/, (m) => m.startsWith('<') ? m : `<p>${m}</p>`);
+  return injectHeadingIds(html);
 }
 
 function TableOfContents({ headings, activeId }) {
@@ -252,9 +258,9 @@ export default function BlogPost() {
 
               {/* AUTHOR BOX */}
               <div className="rounded-2xl p-5 flex gap-4" style={{ background: '#fff', border: '1px solid rgba(21,101,192,0.12)' }}>
-                <div className="w-12 h-12 rounded-xl flex items-center justify-center text-xl flex-shrink-0" style={{ background: 'linear-gradient(135deg, #1565C0, #0288D1)' }}>🦈</div>
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center text-xl flex-shrink-0" style={{ background: 'linear-gradient(135deg, #1565C0, #0288D1)' }}>✅</div>
                 <div>
-                  <div className="font-semibold text-sm mb-1" style={{ color: '#0A1628' }}>Loanshark Editorial Team</div>
+                  <div className="font-semibold text-sm mb-1" style={{ color: '#0A1628' }}>TrueCreds Editorial Team</div>
                   <p className="text-xs leading-relaxed" style={{ color: '#3B5280' }}>Our team compares loan products from 12+ RBI-registered lenders to bring you accurate, unbiased financial guides.</p>
                 </div>
               </div>
