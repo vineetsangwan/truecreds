@@ -26,7 +26,7 @@ ADMIN_NOTIFY_EMAIL = os.getenv("ADMIN_NOTIFY_EMAIL", "")
 WP_BASE_URL        = os.getenv("WP_BASE_URL", "")
 WP_ACTIVE          = os.getenv("WP_ACTIVE", "false").lower() == "true"
 
-client = AsyncIOMotorClient(MONGO_URL, tlsCAFile=__import__("certifi").where())
+client = AsyncIOMotorClient(MONGO_URL)
 db = client[DB_NAME]
 security = HTTPBearer(auto_error=False)
 
