@@ -1,0 +1,333 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-primary: #F0F6FF;
+  --bg-secondary: #FFFFFF;
+  --bg-tertiary: #E8F0FB;
+  --bg-card: #FFFFFF;
+  --text-primary: #0A1628;
+  --text-secondary: #3B5280;
+  --text-muted: #7A90B8;
+  --accent: #1565C0;
+  --accent-light: #1976D2;
+  --accent-hover: #0D47A1;
+  --accent-glow: rgba(21,101,192,0.15);
+  --accent-2: #0288D1;
+  --border-default: rgba(21,101,192,0.12);
+  --border-hover: rgba(21,101,192,0.4);
+  --shadow: 0 4px 24px rgba(21,101,192,0.08);
+  --shadow-hover: 0 12px 40px rgba(21,101,192,0.16);
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: 'Inter', sans-serif;
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+h1,h2,h3,h4,h5,h6 { font-family: 'Outfit', sans-serif; color: var(--text-primary); }
+.font-mono-nums { font-family: 'JetBrains Mono', monospace; }
+
+/* ─── BUTTONS ─── */
+.btn-mint {
+  background: var(--accent);
+  color: #FFFFFF;
+  font-weight: 700;
+  padding: 12px 24px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  letter-spacing: -0.01em;
+  box-shadow: 0 4px 14px rgba(21,101,192,0.3);
+}
+.btn-mint:hover {
+  background: var(--accent-hover);
+  box-shadow: 0 6px 24px rgba(21,101,192,0.45);
+  transform: translateY(-1px);
+  color: #fff;
+}
+.btn-mint:active { transform: translateY(0) scale(0.98); }
+
+.btn-ghost {
+  background: transparent;
+  color: var(--accent);
+  font-weight: 600;
+  padding: 11px 24px;
+  border-radius: 10px;
+  border: 1.5px solid var(--accent);
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+}
+.btn-ghost:hover {
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(21,101,192,0.3);
+}
+
+/* ─── CARDS ─── */
+.card-cosmic {
+  background: var(--bg-card);
+  border: 1px solid var(--border-default);
+  border-radius: 16px;
+  padding: 24px;
+  transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+  box-shadow: var(--shadow);
+}
+.card-cosmic:hover {
+  transform: translateY(-3px);
+  border-color: var(--border-hover);
+  box-shadow: var(--shadow-hover);
+}
+
+/* ─── INPUTS ─── */
+.input-cosmic {
+  background: #fff;
+  border: 1.5px solid var(--border-default);
+  border-radius: 10px;
+  padding: 12px 16px;
+  color: var(--text-primary);
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  width: 100%;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.input-cosmic:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(21,101,192,0.1);
+}
+.input-cosmic::placeholder { color: var(--text-muted); }
+select.input-cosmic option { background: #fff; color: var(--text-primary); }
+textarea.input-cosmic { resize: vertical; min-height: 120px; }
+
+/* ─── BADGE ─── */
+.badge-mint {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(21,101,192,0.08);
+  color: var(--accent);
+  border: 1px solid rgba(21,101,192,0.2);
+  padding: 3px 10px;
+  border-radius: 100px;
+  font-size: 10px;
+  font-family: 'JetBrains Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-weight: 600;
+}
+
+/* ─── NAV ─── */
+.glass-nav {
+  background: rgba(240,246,255,0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border-default);
+}
+
+/* ─── COLORS ─── */
+.text-mint { color: var(--accent); }
+
+/* ─── ANIMATIONS ─── */
+@keyframes pulse-mint {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(21,101,192,0.4); }
+  50% { opacity: 0.7; box-shadow: 0 0 0 6px rgba(21,101,192,0); }
+}
+.pulse-mint { animation: pulse-mint 2.5s ease-in-out infinite; }
+
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+.shimmer-text {
+  background: linear-gradient(90deg, #1565C0 0%, #0288D1 50%, #1565C0 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 4s linear infinite;
+}
+
+@keyframes float1 { 0%,100%{transform:translate(0,0)} 33%{transform:translate(60px,-40px)} 66%{transform:translate(-30px,60px)} }
+@keyframes float2 { 0%,100%{transform:translate(0,0)} 33%{transform:translate(-50px,30px)} 66%{transform:translate(40px,-60px)} }
+@keyframes float3 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(80px,-40px)} }
+
+/* ─── SCROLLBAR ─── */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--bg-primary); }
+::-webkit-scrollbar-thumb { background: rgba(21,101,192,0.2); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(21,101,192,0.4); }
+
+input[type=range] { accent-color: var(--accent); }
+::selection { background: rgba(21,101,192,0.2); color: var(--text-primary); }
+
+/* ─── MOBILE FIXES ─── */
+
+/* Prevent any element from causing horizontal overflow */
+*, *::before, *::after {
+  max-width: 100%;
+}
+
+/* Root overflow guard */
+html, body {
+  overflow-x: hidden;
+  width: 100%;
+}
+
+/* Fix font/text overflow on mobile — wrap long words & URLs */
+p, span, a, li, td, th, label, div {
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Headings: prevent overflow on small screens */
+h1, h2, h3, h4, h5, h6 {
+  word-break: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+  max-width: 100%;
+}
+
+/* Cards: ensure they never overflow on mobile */
+.card-cosmic {
+  overflow: hidden;
+  max-width: 100%;
+  word-break: break-word;
+}
+
+/* Buttons: wrap gracefully on very small screens */
+.btn-mint, .btn-ghost {
+  white-space: normal;
+  text-align: center;
+  word-break: break-word;
+}
+
+/* Inputs: never overflow their container */
+.input-cosmic, input, select, textarea {
+  max-width: 100%;
+  min-width: 0;
+}
+
+/* Badge: allow wrap on mobile */
+.badge-mint {
+  white-space: normal;
+  word-break: break-word;
+}
+
+/* Mobile-specific overrides */
+@media (max-width: 640px) {
+
+  /* Reduce hero heading size on very small screens */
+  h1 {
+    font-size: clamp(1.7rem, 7vw, 2.4rem) !important;
+    line-height: 1.2 !important;
+  }
+
+  h2 {
+    font-size: clamp(1.4rem, 6vw, 2rem) !important;
+    line-height: 1.25 !important;
+  }
+
+  h3 {
+    font-size: clamp(1rem, 4.5vw, 1.4rem) !important;
+  }
+
+  /* Reduce section padding on mobile */
+  section {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+
+  /* Card padding tighter on mobile */
+  .card-cosmic {
+    padding: 16px;
+  }
+
+  /* Buttons full width on mobile for better tap targets */
+  .btn-mint, .btn-ghost {
+    width: 100%;
+    justify-content: center;
+    padding: 12px 16px;
+    font-size: 14px;
+  }
+
+  /* Trust bar items: wrap and center */
+  .flex-wrap {
+    gap: 12px !important;
+  }
+
+  /* Mono tracking text — reduce letter-spacing on mobile to prevent overflow */
+  .font-mono, [style*="tracking-widest"], [style*="letter-spacing"] {
+    letter-spacing: 0.05em !important;
+  }
+
+  /* FAQ card text overflow fix */
+  .card-cosmic span, .card-cosmic p {
+    font-size: 13px;
+  }
+
+  /* Shimmer text: clip properly on mobile */
+  .shimmer-text {
+    display: inline-block;
+    max-width: 100%;
+  }
+
+  /* Grid: single column on very small screens */
+  .grid-cols-2 {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  /* Stat boxes on hero */
+  .grid.grid-cols-2.sm\\:grid-cols-4 {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  /* Remove horizontal padding from max-w containers */
+  .max-w-7xl, .max-w-3xl {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+}
+
+/* Extra-small screens (< 380px) */
+@media (max-width: 380px) {
+  h1 {
+    font-size: 1.6rem !important;
+  }
+
+  h2 {
+    font-size: 1.3rem !important;
+  }
+
+  .card-cosmic {
+    padding: 12px;
+    border-radius: 12px;
+  }
+
+  .btn-mint, .btn-ghost {
+    font-size: 13px;
+    padding: 10px 14px;
+  }
+}
