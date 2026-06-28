@@ -42,19 +42,13 @@ function parseTable(block) {
 function markdownToHtml(text) {
   if (!text) return '';
   if (text.trim().startsWith('<')) return injectHeadingIds(text);
-
-  // Split into blocks to handle tables separately
   const blocks = text.split(/\n\n+/);
   const processed = blocks.map(block => {
     const trimmed = block.trim();
-
-    // Table block — starts and ends with pipe
     if (trimmed.startsWith('|') && trimmed.includes('\n')) {
       const table = parseTable(trimmed);
       if (table) return table;
     }
-
-    // Process inline markdown within the block
     let html = trimmed
       .replace(/^### (.+)$/gm, '<h3>$1</h3>')
       .replace(/^## (.+)$/gm, '<h2>$1</h2>')
@@ -68,14 +62,11 @@ function markdownToHtml(text) {
       .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
       .replace(/^- (.+)$/gm, '<li>$1</li>')
       .replace(/(<li>.*<\/li>\n?)+/g, s => `<ul>${s}</ul>`);
-
-    // Wrap plain text in <p> if not already a block element
     if (!html.match(/^<(h[1-6]|ul|ol|li|blockquote|hr|img|table)/)) {
       html = `<p>${html}</p>`;
     }
     return html;
   });
-
   return injectHeadingIds(processed.join('\n'));
 }
 
@@ -164,7 +155,7 @@ export default function BlogPost() {
     <div className="min-h-[60vh] flex flex-col items-center justify-center text-center px-4">
       <div className="text-6xl mb-4">📭</div>
       <h1 className="font-black text-3xl mb-2" style={{ fontFamily: 'Outfit,sans-serif', color: '#0A1628' }}>Article Not Found</h1>
-      <p className="mb-6" style={{ color: '#3B5280' }}>This article doesn't exist or was removed.</p>
+      <p className="mb-6" style={{ color: '#3B5280' }}>This article does not exist or was removed.</p>
       <Link to="/blog" className="btn-mint">← Back to Blog</Link>
     </div>
   );
@@ -182,17 +173,16 @@ export default function BlogPost() {
 
   return (
     <PageTransition>
-      {/* READING PROGRESS */}
+
+      {/* READING PROGRESS BAR */}
       <div className="fixed top-0 left-0 right-0 h-1 z-[60]" style={{ background: 'rgba(21,101,192,0.1)' }}>
         <motion.div className="h-full rounded-r-full" style={{ background: 'linear-gradient(90deg, #1565C0, #0288D1)', width: `${readProgress}%` }} />
       </div>
 
-      {/* HERO — Ocean Blue */}
+      {/* HERO */}
       <div style={{ background: 'linear-gradient(135deg, #1565C0 0%, #0288D1 60%, #0D47A1 100%)', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-        {/* GRID PATTERN */}
         <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 relative">
-          {/* BREADCRUMB */}
           <div className="flex items-center gap-2 text-xs mb-8" style={{ color: 'rgba(255,255,255,0.7)' }}>
             <Link to="/" className="no-underline hover:text-white transition-colors" style={{ color: 'rgba(255,255,255,0.7)' }}>Home</Link>
             <span>›</span>
@@ -200,40 +190,27 @@ export default function BlogPost() {
             <span>›</span>
             <span className="text-white truncate max-w-xs">{post.title}</span>
           </div>
-
           <div className="max-w-3xl">
-            {/* META */}
             <div className="flex flex-wrap items-center gap-3 mb-5">
               <span className="px-3 py-1 rounded-full text-[10px] font-mono uppercase tracking-wider font-bold" style={{ background: 'rgba(255,255,255,0.2)', color: '#fff' }}>{post.category}</span>
-              <span className="text-xs" style={{ color: 'rgba(255,255,255,0.7)' }}>·</span>
               <span className="text-xs font-mono" style={{ color: 'rgba(255,255,255,0.8)' }}>{post.read_time} read</span>
               {post.published_at && (
-                <>
-                  <span className="text-xs" style={{ color: 'rgba(255,255,255,0.7)' }}>·</span>
-                  <span className="text-xs" style={{ color: 'rgba(255,255,255,0.8)' }}>
-                    {new Date(post.published_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}
-                  </span>
-                </>
+                <span className="text-xs" style={{ color: 'rgba(255,255,255,0.8)' }}>
+                  {new Date(post.published_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}
+                </span>
               )}
             </div>
-
-            {/* TITLE */}
             <h1 className="font-black leading-tight mb-5 text-white" style={{ fontFamily: 'Outfit,sans-serif', fontSize: 'clamp(1.8rem,4vw,2.8rem)', letterSpacing: '-0.02em' }}>
               {post.title}
             </h1>
-
-            {/* EXCERPT */}
             {post.excerpt && (
               <p className="text-lg leading-relaxed mb-6" style={{ color: 'rgba(255,255,255,0.85)' }}>
                 {post.excerpt.replace(/<[^>]+>/g, '')}
               </p>
             )}
-
             <ShareButtons title={post.title} />
           </div>
         </div>
-
-        {/* FEATURED IMAGE */}
         {post.cover_image && (
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-0 relative">
             <div className="rounded-t-2xl overflow-hidden" style={{ maxHeight: 400, border: '1px solid rgba(255,255,255,0.2)', borderBottom: 'none' }}>
@@ -243,170 +220,132 @@ export default function BlogPost() {
         )}
       </div>
 
-      {/* MAIN CONTENT — Fixed panel layout */}
-      <div style={{ background: '#fff' }}>
-        <div style={{ display: 'flex', borderTop: '1px solid rgba(21,101,192,0.08)', width: '100%' }}>
+      {/* MAIN CONTENT — 3 panel sticky layout */}
+      <div style={{ background: '#fff', display: 'flex', alignItems: 'flex-start', borderTop: '1px solid rgba(21,101,192,0.08)' }}>
 
-            {/* LEFT SIDEBAR — sticky, stays fixed while article scrolls */}
-            <aside className="hidden lg:block" style={{ width: '240px', flexShrink: 0, position: 'sticky', top: '64px', height: 'calc(100vh - 64px)', overflowY: 'auto', borderRight: '1px solid rgba(21,101,192,0.1)' }}>
-              <div className="p-5 space-y-5">
-                <TableOfContents headings={headings} activeId={activeId} />
-                <div className="rounded-2xl p-4 text-center" style={{ background: 'linear-gradient(135deg, #1565C0, #0288D1)', boxShadow: '0 8px 24px rgba(21,101,192,0.2)' }}>
-                  <div className="text-2xl mb-2">⚖️</div>
-                  <div className="font-bold text-sm mb-1 text-white" style={{ fontFamily: 'Outfit,sans-serif' }}>Compare Loans</div>
-                  <p className="text-xs mb-3 leading-relaxed" style={{ color: 'rgba(255,255,255,0.8)' }}>Find the lowest rate</p>
-                  <Link to="/compare" className="block text-center font-bold text-sm py-2 px-3 rounded-lg" style={{ background: '#fff', color: '#1565C0' }}>Compare Now →</Link>
-                </div>
+        {/* LEFT SIDEBAR — sticky TOC */}
+        <aside className="hidden lg:block" style={{ width: '240px', flexShrink: 0, position: 'sticky', top: '64px', height: 'calc(100vh - 64px)', overflowY: 'auto', borderRight: '1px solid rgba(21,101,192,0.1)' }}>
+          <div className="p-5 space-y-5">
+            <TableOfContents headings={headings} activeId={activeId} />
+            <div className="rounded-2xl p-4 text-center" style={{ background: 'linear-gradient(135deg, #1565C0, #0288D1)', boxShadow: '0 8px 24px rgba(21,101,192,0.2)' }}>
+              <div className="text-2xl mb-2">⚖️</div>
+              <div className="font-bold text-sm mb-1 text-white" style={{ fontFamily: 'Outfit,sans-serif' }}>Compare Loans</div>
+              <p className="text-xs mb-3 leading-relaxed" style={{ color: 'rgba(255,255,255,0.8)' }}>Find the lowest rate</p>
+              <Link to="/compare" className="block text-center font-bold text-sm py-2 px-3 rounded-lg" style={{ background: '#fff', color: '#1565C0' }}>Compare Now →</Link>
+            </div>
+          </div>
+        </aside>
+
+        {/* CENTER — scrollable article */}
+        <main style={{ flex: 1, minWidth: 0, padding: '40px 48px' }} ref={contentRef}>
+
+          {/* Mobile TOC */}
+          {headings.length > 0 && (
+            <div className="lg:hidden mb-8">
+              <TableOfContents headings={headings} activeId={activeId} />
+            </div>
+          )}
+
+          {/* ARTICLE BODY */}
+          <div className="blog-content mb-8" dangerouslySetInnerHTML={{ __html: contentHtml }} />
+
+          {/* TAGS */}
+          <div className="rounded-2xl p-5 mb-6" style={{ border: '1px solid rgba(21,101,192,0.12)' }}>
+            <div className="flex flex-wrap gap-2 mb-4">
+              {['Personal Loan', 'India', 'CIBIL', 'Finance Tips', post.category].filter(Boolean).map(tag => (
+                <span key={tag} className="px-3 py-1 rounded-full text-xs font-medium"
+                  style={{ border: '1px solid rgba(21,101,192,0.2)', color: '#1565C0', background: 'rgba(21,101,192,0.06)' }}>
+                  #{tag.replace(' ', '')}
+                </span>
+              ))}
+            </div>
+            <ShareButtons title={post.title} />
+          </div>
+
+          {/* AUTHOR */}
+          <div className="rounded-2xl p-5 flex gap-4 mb-10" style={{ border: '1px solid rgba(21,101,192,0.12)' }}>
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center text-xl flex-shrink-0" style={{ background: 'linear-gradient(135deg, #1565C0, #0288D1)' }}>✅</div>
+            <div>
+              <div className="font-semibold text-sm mb-1" style={{ color: '#0A1628' }}>TrueCreds Editorial Team</div>
+              <p className="text-xs leading-relaxed" style={{ color: '#3B5280' }}>Our team compares loan products from 12+ RBI-registered lenders to bring you accurate, unbiased financial guides.</p>
+            </div>
+          </div>
+
+          {/* RELATED POSTS */}
+          {related.length > 0 && (
+            <div className="pt-10" style={{ borderTop: '1px solid rgba(21,101,192,0.1)' }}>
+              <div className="text-[10px] font-mono uppercase tracking-[0.25em] mb-2 font-bold" style={{ color: '#1565C0' }}>/ KEEP READING</div>
+              <h2 className="font-bold text-2xl mb-8" style={{ fontFamily: 'Outfit,sans-serif', color: '#0A1628' }}>Related Articles</h2>
+              <div className="grid sm:grid-cols-3 gap-5">
+                {related.map((p, i) => (
+                  <motion.div key={p.slug} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }}>
+                    <Link to={`/blog/${p.slug}`} className="block no-underline group rounded-2xl overflow-hidden" style={{ border: '1px solid rgba(21,101,192,0.12)', boxShadow: '0 4px 16px rgba(21,101,192,0.06)' }}>
+                      <div className="h-36 overflow-hidden" style={{ background: 'linear-gradient(135deg, #1565C0, #0288D1)' }}>
+                        {p.cover_image
+                          ? <img src={p.cover_image} alt={p.title} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500" />
+                          : <div className="w-full h-full flex items-center justify-center"><span className="text-4xl opacity-30">📄</span></div>
+                        }
+                      </div>
+                      <div className="p-4" style={{ background: '#fff' }}>
+                        <span className="text-[9px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-full mb-2 inline-block font-bold" style={{ background: 'rgba(21,101,192,0.08)', color: '#1565C0' }}>{p.category}</span>
+                        <h3 className="font-semibold text-sm leading-snug" style={{ fontFamily: 'Outfit,sans-serif', color: '#0A1628' }}>{p.title}</h3>
+                        <div className="text-[10px] font-mono mt-2" style={{ color: '#7A90B8' }}>{p.read_time} read</div>
+                      </div>
+                    </Link>
+                  </motion.div>
+                ))}
               </div>
-            </aside>
+            </div>
+          )}
 
-            {/* CENTER — ARTICLE, flex-1 takes remaining space between sidebars */}
-            <article style={{ flex: 1, minWidth: 0, padding: '40px 48px' }} ref={contentRef}>
-              {/* Mobile TOC */}
-              {headings.length > 0 && (
-                <div className="lg:hidden mb-8">
-                  <TableOfContents headings={headings} activeId={activeId} />
-                </div>
-              )}
+        </main>
 
-              {/* ARTICLE CONTENT */}
-              <div className="mb-6">
-                <div className="blog-content" dangerouslySetInnerHTML={{ __html: contentHtml }} />
+        {/* RIGHT SIDEBAR — sticky widgets */}
+        <aside className="hidden lg:block" style={{ width: '260px', flexShrink: 0, position: 'sticky', top: '64px', height: 'calc(100vh - 64px)', overflowY: 'auto', borderLeft: '1px solid rgba(21,101,192,0.1)' }}>
+          <div className="p-5 space-y-5">
+            <EligibilityForm compact />
+
+            {/* QUICK LINKS */}
+            <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid rgba(21,101,192,0.12)', boxShadow: '0 4px 20px rgba(21,101,192,0.06)' }}>
+              <div className="px-5 py-3 border-b" style={{ background: 'linear-gradient(135deg, #1565C0, #0288D1)', borderColor: 'transparent' }}>
+                <div className="text-[10px] font-mono text-white uppercase tracking-[0.2em] font-bold">Quick Links</div>
               </div>
-
-              {/* TAGS */}
-              <div className="rounded-2xl p-5 mb-6" style={{ background: '#fff', border: '1px solid rgba(21,101,192,0.12)' }}>
-                <div className="flex flex-wrap gap-2 mb-4">
-                  {['Personal Loan', 'India', 'CIBIL', 'Finance Tips', post.category].filter(Boolean).map(tag => (
-                    <span key={tag} className="px-3 py-1 rounded-full text-xs font-medium cursor-pointer transition-all"
-                      style={{ border: '1px solid rgba(21,101,192,0.2)', color: '#1565C0', background: 'rgba(21,101,192,0.06)' }}>
-                      #{tag.replace(' ', '')}
-                    </span>
-                  ))}
-                </div>
-                <ShareButtons title={post.title} />
+              <div className="p-3 space-y-1" style={{ background: '#fff' }}>
+                {[
+                  { to: '/compare', label: 'Compare All Lenders', icon: '⚖️' },
+                  { to: '/calculator', label: 'EMI Calculator', icon: '🧮' },
+                  { to: '/loans/personal', label: 'Personal Loans', icon: '👤' },
+                  { to: '/loans/instant', label: 'Instant Loans', icon: '⚡' },
+                  { to: '/loans/no-cibil', label: 'No CIBIL Loans', icon: '📊' },
+                ].map(link => (
+                  <Link key={link.to} to={link.to}
+                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs no-underline transition-all"
+                    style={{ color: '#3B5280' }}
+                    onMouseEnter={e => e.currentTarget.style.background = 'rgba(21,101,192,0.06)'}
+                    onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                    <span>{link.icon}</span>
+                    <span className="flex-1">{link.label}</span>
+                    <span style={{ color: '#1565C0' }}>→</span>
+                  </Link>
+                ))}
               </div>
+            </div>
 
-              {/* AUTHOR BOX */}
-              <div className="rounded-2xl p-5 flex gap-4 mb-10" style={{ background: '#fff', border: '1px solid rgba(21,101,192,0.12)' }}>
-                <div className="w-12 h-12 rounded-xl flex items-center justify-center text-xl flex-shrink-0" style={{ background: 'linear-gradient(135deg, #1565C0, #0288D1)' }}>✅</div>
-                <div>
-                  <div className="font-semibold text-sm mb-1" style={{ color: '#0A1628' }}>TrueCreds Editorial Team</div>
-                  <p className="text-xs leading-relaxed" style={{ color: '#3B5280' }}>Our team compares loan products from 12+ RBI-registered lenders to bring you accurate, unbiased financial guides.</p>
+            {/* RATE TICKER */}
+            <div className="rounded-2xl p-4" style={{ background: '#fff', border: '1.5px solid rgba(21,101,192,0.2)', boxShadow: '0 4px 20px rgba(21,101,192,0.08)' }}>
+              <div className="text-[10px] font-mono uppercase tracking-wider mb-3 font-bold" style={{ color: '#1565C0' }}>Today's Best Rates</div>
+              {[['Navi', '9.9%'], ['Bajaj', '11%'], ['MoneyTap', '13%']].map(([name, rate]) => (
+                <div key={name} className="flex justify-between items-center py-2 border-b last:border-0" style={{ borderColor: 'rgba(21,101,192,0.08)' }}>
+                  <span className="text-xs" style={{ color: '#3B5280' }}>{name}</span>
+                  <span className="text-xs font-mono font-bold" style={{ color: '#1565C0' }}>{rate} p.a.</span>
                 </div>
-              </div>
-
-            </article>
-
-            {/* RIGHT SIDEBAR — sticky, stays fixed while article scrolls */}
-            <aside className="hidden lg:block" style={{ width: '260px', flexShrink: 0, position: 'sticky', top: '64px', height: 'calc(100vh - 64px)', overflowY: 'auto', borderLeft: '1px solid rgba(21,101,192,0.1)' }}>
-              <div className="p-5 space-y-5">
-                <EligibilityForm compact />
-
-                {/* QUICK LINKS */}
-                <div className="rounded-2xl overflow-hidden" style={{ background: '#fff', border: '1px solid rgba(21,101,192,0.12)', boxShadow: '0 4px 20px rgba(21,101,192,0.06)' }}>
-                  <div className="px-5 py-3 border-b" style={{ background: 'linear-gradient(135deg, #1565C0, #0288D1)', borderColor: 'transparent' }}>
-                    <div className="text-[10px] font-mono text-white uppercase tracking-[0.2em] font-bold">Quick Links</div>
-                  </div>
-                  <div className="p-3 space-y-1">
-                    {[
-                      { to: '/compare', label: 'Compare All Lenders', icon: '⚖️' },
-                      { to: '/calculator', label: 'EMI Calculator', icon: '🧮' },
-                      { to: '/loans/personal', label: 'Personal Loans', icon: '👤' },
-                      { to: '/loans/instant', label: 'Instant Loans', icon: '⚡' },
-                      { to: '/loans/no-cibil', label: 'No CIBIL Loans', icon: '📊' },
-                    ].map(link => (
-                      <Link key={link.to} to={link.to}
-                        className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs no-underline transition-all group"
-                        style={{ color: '#3B5280' }}
-                        onMouseEnter={e => e.currentTarget.style.background = 'rgba(21,101,192,0.06)'}
-                        onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                        <span>{link.icon}</span>
-                        <span className="flex-1">{link.label}</span>
-                        <span style={{ color: '#1565C0' }}>→</span>
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-
-                {/* RATE TICKER */}
-                <div className="rounded-2xl p-4" style={{ background: '#fff', border: '1.5px solid rgba(21,101,192,0.2)', boxShadow: '0 4px 20px rgba(21,101,192,0.08)' }}>
-                  <div className="text-[10px] font-mono uppercase tracking-wider mb-3 font-bold" style={{ color: '#1565C0' }}>Today's Best Rates</div>
-                  {[['Navi', '9.9%'], ['Bajaj', '11%'], ['MoneyTap', '13%']].map(([name, rate]) => (
-                    <div key={name} className="flex justify-between items-center py-2 border-b last:border-0" style={{ borderColor: 'rgba(21,101,192,0.08)' }}>
-                      <span className="text-xs" style={{ color: '#3B5280' }}>{name}</span>
-                      <span className="text-xs font-mono font-bold" style={{ color: '#1565C0' }}>{rate} p.a.</span>
-                    </div>
-                  ))}
-                  <Link to="/compare" className="btn-ghost text-xs px-3 py-2 w-full justify-center mt-3 block text-center">See All Rates →</Link>
-                </div>
-              </div>
-            </aside>
+              ))}
+              <Link to="/compare" className="btn-ghost text-xs px-3 py-2 w-full justify-center mt-3 block text-center">See All Rates →</Link>
+            </div>
 
           </div>
-        </div>
-                  <div className="p-3 space-y-1">
-                    {[
-                      { to: '/compare', label: 'Compare All Lenders', icon: '⚖️' },
-                      { to: '/calculator', label: 'EMI Calculator', icon: '🧮' },
-                      { to: '/loans/personal', label: 'Personal Loans', icon: '👤' },
-                      { to: '/loans/instant', label: 'Instant Loans', icon: '⚡' },
-                      { to: '/loans/no-cibil', label: 'No CIBIL Loans', icon: '📊' },
-                    ].map(link => (
-                      <Link key={link.to} to={link.to}
-                        className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs no-underline transition-all group"
-                        style={{ color: '#3B5280' }}
-                        onMouseEnter={e => e.currentTarget.style.background = 'rgba(21,101,192,0.06)'}
-                        onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                        <span>{link.icon}</span>
-                        <span className="flex-1">{link.label}</span>
-                        <span style={{ color: '#1565C0' }}>→</span>
-                      </Link>
-                    ))}
-                  </div>
-                </div>
+        </aside>
 
-                {/* RATE TICKER */}
-                <div className="rounded-2xl p-4" style={{ background: '#fff', border: '1.5px solid rgba(21,101,192,0.2)', boxShadow: '0 4px 20px rgba(21,101,192,0.08)' }}>
-                  <div className="text-[10px] font-mono uppercase tracking-wider mb-3 font-bold" style={{ color: '#1565C0' }}>Today's Best Rates</div>
-                  {[['Navi', '9.9%'], ['Bajaj', '11%'], ['MoneyTap', '13%']].map(([name, rate]) => (
-                    <div key={name} className="flex justify-between items-center py-2 border-b last:border-0" style={{ borderColor: 'rgba(21,101,192,0.08)' }}>
-                      <span className="text-xs" style={{ color: '#3B5280' }}>{name}</span>
-                      <span className="text-xs font-mono font-bold" style={{ color: '#1565C0' }}>{rate} p.a.</span>
-                    </div>
-                  ))}
-                  <Link to="/compare" className="btn-ghost text-xs px-3 py-2 w-full justify-center mt-3 block text-center">See All Rates →</Link>
-                </div>
-              </div>
-            </aside>
-        </div>
-
-        {/* RELATED POSTS — full width below 3-col layout */}
-        {related.length > 0 && (
-        <div className="max-w-6xl mx-auto px-8 lg:px-12 py-12" style={{ borderTop: '1px solid rgba(21,101,192,0.1)' }}>
-          <div className="text-[10px] font-mono uppercase tracking-[0.25em] mb-2 font-bold" style={{ color: '#1565C0' }}>/ KEEP READING</div>
-          <h2 className="font-bold text-2xl mb-8" style={{ fontFamily: 'Outfit,sans-serif', color: '#0A1628' }}>Related Articles</h2>
-          <div className="grid sm:grid-cols-3 gap-5">
-            {related.map((p, i) => (
-              <motion.div key={p.slug} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }}>
-                <Link to={"/blog/" + p.slug} className="block no-underline group rounded-2xl overflow-hidden transition-all" style={{ background: '#fff', border: '1px solid rgba(21,101,192,0.12)', boxShadow: '0 4px 16px rgba(21,101,192,0.06)' }}>
-                  <div className="h-36 overflow-hidden" style={{ background: 'linear-gradient(135deg, #1565C0, #0288D1)' }}>
-                    {p.cover_image
-                      ? <img src={p.cover_image} alt={p.title} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500" />
-                      : <div className="w-full h-full flex items-center justify-center"><span className="text-4xl opacity-30">📄</span></div>
-                    }
-                  </div>
-                  <div className="p-4">
-                    <span className="text-[9px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-full mb-2 inline-block font-bold" style={{ background: 'rgba(21,101,192,0.08)', color: '#1565C0' }}>{p.category}</span>
-                    <h3 className="font-semibold text-sm leading-snug" style={{ fontFamily: 'Outfit,sans-serif', color: '#0A1628' }}>{p.title}</h3>
-                    <div className="text-[10px] font-mono mt-2" style={{ color: '#7A90B8' }}>{p.read_time} read</div>
-                  </div>
-                </Link>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-        )}
       </div>
 
       <style>{`
@@ -433,6 +372,7 @@ export default function BlogPost() {
         .blog-content tr:hover td { background: rgba(21,101,192,0.03); }
         .blog-content hr { border: none; border-top: 2px solid rgba(21,101,192,0.1); margin: 2rem 0; }
       `}</style>
+
     </PageTransition>
   );
 }
