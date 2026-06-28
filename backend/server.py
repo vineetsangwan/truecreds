@@ -31,7 +31,15 @@ db = client[DB_NAME]
 security = HTTPBearer(auto_error=False)
 
 # ─── MODELS ───────────────────────────────────────────────────────────────────
-
+app.add_middleware(CORSMiddleware,
+    allow_origins=[
+        "https://truecreds.in",
+        "https://www.truecreds.in"
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"]
+)
 class LeadCreate(BaseModel):
     model_config = ConfigDict(extra="ignore")
     full_name: str
