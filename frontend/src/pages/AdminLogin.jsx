@@ -28,9 +28,9 @@ export default function AdminLogin() {
       <Toaster theme="dark" />
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <div className="text-4xl mb-3">🦈</div>
-          <div className="font-black text-2xl mb-1" style={{fontFamily:'Outfit,sans-serif'}}>Loan<span className="text-mint">shark</span></div>
-          <div className="text-slate-500 text-sm">Command Center.</div>
+          <div className="text-4xl mb-3">✅</div>
+          <div className="font-black text-2xl mb-1" style={{fontFamily:'Outfit,sans-serif'}}>True<span className="text-mint">Creds</span></div>
+          <div className="text-slate-500 text-sm">Admin Panel</div>
         </div>
         <div className="card-cosmic space-y-4" data-testid="admin-login-form">
           <div>
