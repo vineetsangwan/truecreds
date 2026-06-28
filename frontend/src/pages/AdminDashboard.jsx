@@ -98,6 +98,264 @@ function LeadsTab() {
   );
 }
 
+function BlogTab() {
+  const EMPTY = { title: '', slug: '', excerpt: '', content: '', category: 'Personal Loan', cover_image: '', read_time: '5 min', status: 'publish' };
+  const CATEGORIES = ['Personal Loan', 'Business Loan', 'Student Loan', 'Instant Loan', 'Credit Score', 'Finance Tips', 'General'];
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [view, setView] = useState('list'); // 'list' | 'new' | 'edit'
+  const [form, setForm] = useState(EMPTY);
+  const [editId, setEditId] = useState(null);
+  const [saving, setSaving] = useState(false);
+
+  const load = async () => {
+    setLoading(true);
+    try { const r = await api.get('/api/admin/blog/posts'); setPosts(r.data); }
+    catch { toast.error('Failed to load posts'); }
+    setLoading(false);
+  };
+
+  useEffect(() => { load(); }, []);
+
+  const autoSlug = (title) => title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+
+  const save = async () => {
+    if (!form.title || !form.content) return toast.error('Title and content are required');
+    setSaving(true);
+    try {
+      if (view === 'new') {
+        await api.post('/api/admin/blog/posts', form);
+        toast.success('Post created!');
+      } else {
+        await api.put(`/api/admin/blog/posts/${editId}`, form);
+        toast.success('Post updated!');
+      }
+      setView('list'); setForm(EMPTY); setEditId(null);
+      load();
+    } catch (e) {
+      toast.error(e.response?.data?.detail || 'Save failed');
+    }
+    setSaving(false);
+  };
+
+  const del = async (id, title) => {
+    if (!window.confirm(`Delete "${title}"?`)) return;
+    try { await api.delete(`/api/admin/blog/posts/${id}`); toast.success('Deleted'); load(); }
+    catch { toast.error('Delete failed'); }
+  };
+
+  const startEdit = (post) => {
+    setForm({ title: post.title, slug: post.slug, excerpt: post.excerpt || '', content: post.content, category: post.category || 'General', cover_image: post.cover_image || '', read_time: post.read_time || '5 min', status: post.status || 'publish' });
+    setEditId(post.id);
+    setView('edit');
+  };
+
+  const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+
+  if (view === 'list') return (
+    <div>
+      <div className="flex items-center justify-between mb-6">
+        <h3 className="font-semibold text-slate-200">Blog Posts ({posts.length})</h3>
+        <button className="btn-mint text-xs px-4 py-2" onClick={() => { setForm(EMPTY); setView('new'); }}>+ New Post</button>
+      </div>
+      {loading ? <p className="text-slate-500 text-sm">Loading...</p> : posts.length === 0 ? (
+        <div className="text-center py-16 text-slate-600">
+          <div className="text-4xl mb-3">📝</div>
+          <p className="text-sm">No blog posts yet. Create your first one!</p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {posts.map(p => (
+            <div key={p.id} className="flex items-center justify-between gap-4 p-4 rounded-xl border border-[rgba(255,255,255,0.07)] hover:border-[rgba(0,255,157,0.2)] transition-all" style={{ background: '#0A1728' }}>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="font-semibold text-sm text-slate-200 truncate">{p.title}</span>
+                  <span className={`text-[9px] font-mono px-2 py-0.5 rounded-full uppercase ${p.status === 'publish' ? 'bg-[rgba(0,255,157,0.1)] text-[#00FF9D]' : 'bg-[rgba(255,255,255,0.06)] text-slate-500'}`}>{p.status}</span>
+                </div>
+                <div className="flex items-center gap-3 text-[10px] text-slate-600 font-mono">
+                  <span>/{p.slug}</span>
+                  <span>·</span>
+                  <span>{p.category}</span>
+                  <span>·</span>
+                  <span>{p.read_time}</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 flex-shrink-0">
+                <a href={`/blog/${p.slug}`} target="_blank" rel="noreferrer" className="text-xs text-slate-500 hover:text-[#00FF9D] transition-colors no-underline px-2 py-1">View →</a>
+                <button className="btn-ghost text-xs px-3 py-1.5" onClick={() => startEdit(p)}>Edit</button>
+                <button className="text-xs px-3 py-1.5 rounded-lg border border-red-900 text-red-500 hover:bg-red-900/20 transition-all" onClick={() => del(p.id, p.title)}>Delete</button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+
+  return (
+    <div>
+      <div className="flex items-center gap-3 mb-6">
+        <button className="text-slate-500 hover:text-white text-sm transition-colors" onClick={() => { setView('list'); setForm(EMPTY); setEditId(null); }}>← Back</button>
+        <h3 className="font-semibold text-slate-200">{view === 'new' ? 'New Blog Post' : 'Edit Post'}</h3>
+      </div>
+
+      <div className="space-y-5 max-w-3xl">
+        {/* Title */}
+        <div>
+          <label className="text-xs text-slate-500 uppercase tracking-wider mb-1.5 block">Title *</label>
+          <input className="input-cosmic" placeholder="e.g. Best Personal Loans in India 2026" value={form.title}
+            onChange={e => { set('title', e.target.value); if (view === 'new') set('slug', autoSlug(e.target.value)); }} />
+        </div>
+
+        {/* Slug */}
+        <div>
+          <label className="text-xs text-slate-500 uppercase tracking-wider mb-1.5 block">Slug (URL)</label>
+          <div className="flex items-center gap-2">
+            <span className="text-slate-600 text-xs font-mono">/blog/</span>
+            <input className="input-cosmic flex-1" placeholder="best-personal-loans-india-2026" value={form.slug}
+              onChange={e => set('slug', e.target.value)} />
+          </div>
+        </div>
+
+        {/* Excerpt */}
+        <div>
+          <label className="text-xs text-slate-500 uppercase tracking-wider mb-1.5 block">Excerpt (short description)</label>
+          <input className="input-cosmic" placeholder="A short summary shown on blog listing page..." value={form.excerpt}
+            onChange={e => set('excerpt', e.target.value)} />
+        </div>
+
+        {/* Category + Read Time + Status */}
+        <div className="grid grid-cols-3 gap-4">
+          <div>
+            <label className="text-xs text-slate-500 uppercase tracking-wider mb-1.5 block">Category</label>
+            <select className="input-cosmic" value={form.category} onChange={e => set('category', e.target.value)}>
+              {CATEGORIES.map(c => <option key={c}>{c}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="text-xs text-slate-500 uppercase tracking-wider mb-1.5 block">Read Time</label>
+            <input className="input-cosmic" placeholder="5 min" value={form.read_time} onChange={e => set('read_time', e.target.value)} />
+          </div>
+          <div>
+            <label className="text-xs text-slate-500 uppercase tracking-wider mb-1.5 block">Status</label>
+            <select className="input-cosmic" value={form.status} onChange={e => set('status', e.target.value)}>
+              <option value="publish">Published</option>
+              <option value="draft">Draft</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Cover Image */}
+        <div>
+          <label className="text-xs text-slate-500 uppercase tracking-wider mb-1.5 block">Cover Image URL</label>
+          <input className="input-cosmic" placeholder="https://example.com/image.jpg" value={form.cover_image}
+            onChange={e => set('cover_image', e.target.value)} />
+        </div>
+
+        {/* Content Editor with Toolbar */}
+        <div>
+          <label className="text-xs text-slate-500 uppercase tracking-wider mb-1.5 block">Content * <span className="text-slate-700 normal-case">(use ## for headings, ### for subheadings)</span></label>
+
+          {/* TOOLBAR */}
+          <div className="flex flex-wrap items-center gap-1 p-2 rounded-t-xl border border-b-0 border-[rgba(255,255,255,0.1)]" style={{ background: '#0D1B2E' }}>
+            {[
+              { label: 'H2', title: 'Heading 2', insert: '\n## ' },
+              { label: 'H3', title: 'Heading 3', insert: '\n### ' },
+              { label: 'B', title: 'Bold', wrap: ['**', '**'] },
+              { label: 'I', title: 'Italic', wrap: ['*', '*'] },
+              { label: '— HR', title: 'Divider', insert: '\n\n---\n\n' },
+              { label: '• List', title: 'Bullet list', insert: '\n- Item one\n- Item two\n- Item three\n' },
+              { label: '> Quote', title: 'Blockquote', insert: '\n> Your quote here\n' },
+              { label: '` Code', title: 'Inline code', wrap: ['`', '`'] },
+            ].map(tool => (
+              <button key={tool.label} title={tool.title} type="button"
+                className="px-2.5 py-1 rounded text-xs font-mono text-slate-400 hover:text-white hover:bg-[rgba(255,255,255,0.08)] transition-all"
+                onClick={() => {
+                  const ta = document.getElementById('blog-content-editor');
+                  const start = ta.selectionStart, end = ta.selectionEnd;
+                  const selected = form.content.substring(start, end);
+                  let newText;
+                  if (tool.wrap) {
+                    newText = form.content.substring(0, start) + tool.wrap[0] + (selected || 'text') + tool.wrap[1] + form.content.substring(end);
+                  } else {
+                    newText = form.content.substring(0, start) + tool.insert + form.content.substring(end);
+                  }
+                  set('content', newText);
+                  setTimeout(() => { ta.focus(); }, 10);
+                }}>
+                {tool.label}
+              </button>
+            ))}
+
+            <div className="w-px h-5 mx-1" style={{ background: 'rgba(255,255,255,0.1)' }} />
+
+            {/* IMAGE INSERT */}
+            <button type="button" title="Insert Image"
+              className="px-2.5 py-1 rounded text-xs font-mono text-slate-400 hover:text-[#00FF9D] hover:bg-[rgba(0,255,157,0.08)] transition-all"
+              onClick={() => {
+                const url = window.prompt('Image URL:', 'https://');
+                if (!url) return;
+                const alt = window.prompt('Alt text (description):', 'Image');
+                const ta = document.getElementById('blog-content-editor');
+                const pos = ta.selectionStart;
+                const insert = `\n![${alt || 'Image'}](${url})\n`;
+                set('content', form.content.substring(0, pos) + insert + form.content.substring(pos));
+              }}>
+              🖼 Image
+            </button>
+
+            {/* LINK INSERT */}
+            <button type="button" title="Insert Link"
+              className="px-2.5 py-1 rounded text-xs font-mono text-slate-400 hover:text-[#00FF9D] hover:bg-[rgba(0,255,157,0.08)] transition-all"
+              onClick={() => {
+                const ta = document.getElementById('blog-content-editor');
+                const start = ta.selectionStart, end = ta.selectionEnd;
+                const selected = form.content.substring(start, end);
+                const text = window.prompt('Link text:', selected || 'Click here');
+                if (!text) return;
+                const url = window.prompt('URL:', 'https://');
+                if (!url) return;
+                const insert = `[${text}](${url})`;
+                set('content', form.content.substring(0, start) + insert + form.content.substring(end));
+              }}>
+              🔗 Link
+            </button>
+
+            {/* TABLE INSERT */}
+            <button type="button" title="Insert Table"
+              className="px-2.5 py-1 rounded text-xs font-mono text-slate-400 hover:text-[#00FF9D] hover:bg-[rgba(0,255,157,0.08)] transition-all"
+              onClick={() => {
+                const ta = document.getElementById('blog-content-editor');
+                const pos = ta.selectionStart;
+                const insert = '\n| Header 1 | Header 2 | Header 3 |\n|---|---|---|\n| Row 1 | Data | Data |\n| Row 2 | Data | Data |\n';
+                set('content', form.content.substring(0, pos) + insert + form.content.substring(pos));
+              }}>
+              📊 Table
+            </button>
+          </div>
+
+          <textarea id="blog-content-editor"
+            className="input-cosmic font-mono text-xs leading-relaxed rounded-t-none"
+            style={{ borderTopLeftRadius: 0, borderTopRightRadius: 0 }}
+            rows={22}
+            placeholder={`## Introduction\nWrite your intro here.\n\n## Section One\nYour content here.\n\n### Subsection\nMore details here.\n\n![Image description](https://example.com/image.jpg)\n\n[Read more](https://truecreds.in/compare)\n\n## Conclusion\nWrap up here.`}
+            value={form.content} onChange={e => set('content', e.target.value)} />
+          <p className="text-[10px] text-slate-600 mt-1.5">
+            💡 <code className="bg-[rgba(255,255,255,0.06)] px-1 rounded">## Heading</code> · <code className="bg-[rgba(255,255,255,0.06)] px-1 rounded">**bold**</code> · <code className="bg-[rgba(255,255,255,0.06)] px-1 rounded">![alt](url)</code> for images · <code className="bg-[rgba(255,255,255,0.06)] px-1 rounded">[text](url)</code> for links
+          </p>
+        </div>
+
+        <div className="flex items-center gap-3 pt-2">
+          <button className="btn-mint px-6 py-2.5 text-sm" onClick={save} disabled={saving}>
+            {saving ? 'Saving...' : view === 'new' ? 'Publish Post →' : 'Save Changes →'}
+          </button>
+          <button className="btn-ghost px-4 py-2.5 text-sm" onClick={() => { setView('list'); setForm(EMPTY); setEditId(null); }}>Cancel</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function WpTab() {
   const [cfg, setCfg] = useState({ base_url: '', active: false, wp_username: '', wp_app_password: '' });
   const [logs, setLogs] = useState([]);
@@ -348,8 +606,8 @@ export default function AdminDashboard() {
       {/* ADMIN NAV */}
       <div className="border-b border-[rgba(255,255,255,0.07)] px-6 py-4 flex items-center justify-between" style={{ background: 'rgba(7,15,30,0.95)', backdropFilter: 'blur(20px)' }}>
         <div className="flex items-center gap-3">
-          <span className="text-2xl">🦈</span>
-          <span className="font-black text-lg text-white" style={{ fontFamily: 'Outfit,sans-serif' }}>Loan<span style={{ color: '#00FF9D' }}>shark</span></span>
+          <span className="text-2xl">✅</span>
+          <span className="font-black text-lg text-white" style={{ fontFamily: 'Outfit,sans-serif' }}>True<span style={{ color: '#00FF9D' }}>Creds</span></span>
           <span className="badge-mint text-[9px]">ADMIN</span>
         </div>
         <button className="btn-ghost text-sm px-4 py-2" onClick={logout}>Sign Out →</button>
@@ -363,7 +621,7 @@ export default function AdminDashboard() {
 
         {/* TABS */}
         <div className="flex gap-1 mb-8 border-b border-[rgba(255,255,255,0.07)]" data-testid="admin-tabs">
-          {[['leads', 'Leads Manager'], ['wordpress', 'WordPress Sync'], ['pages', 'Page Builder'], ['status', 'Status Monitor']].map(([id, label]) => (
+          {[['leads', 'Leads Manager'], ['blog', '✍️ Blog Manager'], ['wordpress', 'WordPress Sync'], ['pages', 'Page Builder'], ['status', 'Status Monitor']].map(([id, label]) => (
             <button key={id} onClick={() => setTab(id)} data-testid={`tab-${id}`}
               className={`px-5 py-3 text-sm font-medium border-b-2 transition-all -mb-px ${tab === id ? 'border-[#00FF9D] text-[#00FF9D]' : 'border-transparent text-slate-500 hover:text-slate-300'}`}>
               {label}
@@ -374,6 +632,7 @@ export default function AdminDashboard() {
         <AnimatePresence mode="wait">
           <motion.div key={tab} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
             {tab === 'leads' && <LeadsTab />}
+            {tab === 'blog' && <BlogTab />}
             {tab === 'wordpress' && <WpTab />}
             {tab === 'status' && <StatusTab />}
             {tab === 'pages' && <PageBuilder />}
