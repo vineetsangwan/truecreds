@@ -70,7 +70,7 @@ function markdownToHtml(text) {
   return injectHeadingIds(processed.join('\n'));
 }
 
-function TableOfContents({ headings, activeId }) {
+function TableOfContents({ headings, activeId, onHeadingClick }) {
   if (!headings.length) return null;
   return (
     <div className="rounded-2xl overflow-hidden" style={{ background: '#fff', border: '1px solid rgba(21,101,192,0.15)', boxShadow: '0 4px 20px rgba(21,101,192,0.08)' }}>
@@ -80,7 +80,8 @@ function TableOfContents({ headings, activeId }) {
       <nav className="p-3 space-y-1">
         {headings.map((h, i) => (
           <a key={i} href={`#${h.id}`}
-            className={`block text-xs py-2 px-3 rounded-lg transition-all no-underline ${h.level === 3 ? 'ml-3' : ''} ${activeId === h.id ? 'font-semibold' : ''}`}
+            onClick={e => { e.preventDefault(); onHeadingClick && onHeadingClick(h.id); }}
+            className={`block text-xs py-2 px-3 rounded-lg transition-all no-underline cursor-pointer ${h.level === 3 ? 'ml-3' : ''} ${activeId === h.id ? 'font-semibold' : ''}`}
             style={{ color: activeId === h.id ? '#1565C0' : '#3B5280', background: activeId === h.id ? 'rgba(21,101,192,0.08)' : 'transparent' }}>
             {h.level === 3 && <span className="mr-1" style={{ color: '#94A3B8' }}>└</span>}
             {h.text}
@@ -123,6 +124,15 @@ export default function BlogPost() {
   const [readProgress, setReadProgress] = useState(0);
   const contentRef = useRef(null);
 
+  const scrollToHeading = (id) => {
+    const el = contentRef.current;
+    if (!el) return;
+    const target = el.querySelector(`#${id}`);
+    if (target) {
+      el.scrollTo({ top: target.offsetTop - 20, behavior: 'smooth' });
+    }
+  };
+
   useEffect(() => {
     setPost(null); setError(false); setHeadings([]);
     api.get(`/api/blog/posts/${slug}`).then(r => {
@@ -137,18 +147,22 @@ export default function BlogPost() {
   }, [slug]);
 
   useEffect(() => {
+    const el = contentRef.current;
+    if (!el) return;
     const onScroll = () => {
-      const total = document.documentElement.scrollHeight - window.innerHeight;
-      setReadProgress(Math.min(100, (window.scrollY / total) * 100));
-      if (contentRef.current) {
-        const allH = contentRef.current.querySelectorAll('h2, h3');
-        let current = '';
-        allH.forEach(h => { if (h.getBoundingClientRect().top <= 120) current = h.id; });
-        if (current) setActiveId(current);
-      }
+      // Track scroll progress of the article container itself
+      const total = el.scrollHeight - el.clientHeight;
+      setReadProgress(total > 0 ? Math.min(100, (el.scrollTop / total) * 100) : 0);
+      // Active heading detection
+      const allH = el.querySelectorAll('h2, h3');
+      let current = '';
+      allH.forEach(h => {
+        if (h.getBoundingClientRect().top <= 120) current = h.id;
+      });
+      if (current) setActiveId(current);
     };
-    window.addEventListener('scroll', onScroll);
-    return () => window.removeEventListener('scroll', onScroll);
+    el.addEventListener('scroll', onScroll);
+    return () => el.removeEventListener('scroll', onScroll);
   }, [post]);
 
   if (error) return (
@@ -220,13 +234,13 @@ export default function BlogPost() {
         )}
       </div>
 
-      {/* MAIN CONTENT — 3 panel sticky layout */}
-      <div style={{ background: '#fff', display: 'flex', alignItems: 'flex-start', borderTop: '1px solid rgba(21,101,192,0.08)' }}>
+      {/* MAIN CONTENT — fixed sidebars, only article scrolls */}
+      <div style={{ background: '#fff', display: 'flex', height: 'calc(100vh - 64px)', position: 'sticky', top: '64px', borderTop: '1px solid rgba(21,101,192,0.08)' }}>
 
-        {/* LEFT SIDEBAR — sticky TOC */}
-        <aside className="hidden lg:block" style={{ width: '240px', flexShrink: 0, position: 'sticky', top: '64px', height: 'calc(100vh - 64px)', overflowY: 'auto', borderRight: '1px solid rgba(21,101,192,0.1)' }}>
+        {/* LEFT SIDEBAR — fixed, never scrolls */}
+        <aside className="hidden lg:flex flex-col" style={{ width: '240px', flexShrink: 0, height: '100%', overflowY: 'auto', borderRight: '1px solid rgba(21,101,192,0.1)', scrollbarWidth: 'none' }}>
           <div className="p-5 space-y-5">
-            <TableOfContents headings={headings} activeId={activeId} />
+            <TableOfContents headings={headings} activeId={activeId} onHeadingClick={scrollToHeading} />
             <div className="rounded-2xl p-4 text-center" style={{ background: 'linear-gradient(135deg, #1565C0, #0288D1)', boxShadow: '0 8px 24px rgba(21,101,192,0.2)' }}>
               <div className="text-2xl mb-2">⚖️</div>
               <div className="font-bold text-sm mb-1 text-white" style={{ fontFamily: 'Outfit,sans-serif' }}>Compare Loans</div>
@@ -236,13 +250,13 @@ export default function BlogPost() {
           </div>
         </aside>
 
-        {/* CENTER — scrollable article */}
-        <main style={{ flex: 1, minWidth: 0, padding: '40px 48px' }} ref={contentRef}>
+        {/* CENTER — ONLY this scrolls */}
+        <main style={{ flex: 1, minWidth: 0, height: '100%', overflowY: 'auto', padding: '40px 48px' }} ref={contentRef}>
 
           {/* Mobile TOC */}
           {headings.length > 0 && (
             <div className="lg:hidden mb-8">
-              <TableOfContents headings={headings} activeId={activeId} />
+              <TableOfContents headings={headings} activeId={activeId} onHeadingClick={scrollToHeading} />
             </div>
           )}
 
@@ -300,8 +314,8 @@ export default function BlogPost() {
 
         </main>
 
-        {/* RIGHT SIDEBAR — sticky widgets */}
-        <aside className="hidden lg:block" style={{ width: '260px', flexShrink: 0, position: 'sticky', top: '64px', height: 'calc(100vh - 64px)', overflowY: 'auto', borderLeft: '1px solid rgba(21,101,192,0.1)' }}>
+        {/* RIGHT SIDEBAR — fixed, never scrolls */}
+        <aside className="hidden lg:flex flex-col" style={{ width: '260px', flexShrink: 0, height: '100%', overflowY: 'auto', borderLeft: '1px solid rgba(21,101,192,0.1)', scrollbarWidth: 'none' }}>
           <div className="p-5 space-y-5">
             <EligibilityForm compact />
 
