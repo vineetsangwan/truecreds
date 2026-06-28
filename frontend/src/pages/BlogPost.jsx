@@ -379,7 +379,6 @@ export default function BlogPost() {
                 </div>
               </div>
             </aside>
-          </div>
         </div>
 
         {/* RELATED POSTS — full width below 3-col layout */}
