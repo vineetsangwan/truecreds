@@ -25,26 +25,58 @@ function injectHeadingIds(html) {
   });
 }
 
+function parseTable(block) {
+  const lines = block.trim().split('\n').filter(l => l.trim());
+  if (lines.length < 2) return null;
+  const isSeparator = (l) => /^\|[\s|:-]+\|$/.test(l.trim());
+  if (!isSeparator(lines[1])) return null;
+  const parseRow = (line) =>
+    line.trim().replace(/^\||\|$/g, '').split('|').map(cell => cell.trim());
+  const headers = parseRow(lines[0]);
+  const rows = lines.slice(2).map(parseRow);
+  const thead = `<thead><tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr></thead>`;
+  const tbody = `<tbody>${rows.map(r => `<tr>${r.map(c => `<td>${c}</td>`).join('')}</tr>`).join('')}</tbody>`;
+  return `<table>${thead}${tbody}</table>`;
+}
+
 function markdownToHtml(text) {
   if (!text) return '';
   if (text.trim().startsWith('<')) return injectHeadingIds(text);
-  let html = text
-    .replace(/^### (.+)$/gm, '<h3>$1</h3>')
-    .replace(/^## (.+)$/gm, '<h2>$1</h2>')
-    .replace(/^# (.+)$/gm, '<h1>$1</h1>')
-    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-    .replace(/\*(.+?)\*/g, '<em>$1</em>')
-    .replace(/`(.+?)`/g, '<code>$1</code>')
-    .replace(/^> (.+)$/gm, '<blockquote>$1</blockquote>')
-    .replace(/^---$/gm, '<hr>')
-    .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" />')
-    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
-    .replace(/^- (.+)$/gm, '<li>$1</li>')
-    .replace(/(<li>.*<\/li>\n?)+/g, s => `<ul>${s}</ul>`)
-    .replace(/\n\n/g, '</p><p>')
-    .trim()
-    .replace(/^(.+)$/, (m) => m.startsWith('<') ? m : `<p>${m}</p>`);
-  return injectHeadingIds(html);
+
+  // Split into blocks to handle tables separately
+  const blocks = text.split(/\n\n+/);
+  const processed = blocks.map(block => {
+    const trimmed = block.trim();
+
+    // Table block — starts and ends with pipe
+    if (trimmed.startsWith('|') && trimmed.includes('\n')) {
+      const table = parseTable(trimmed);
+      if (table) return table;
+    }
+
+    // Process inline markdown within the block
+    let html = trimmed
+      .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+      .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+      .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.+?)\*/g, '<em>$1</em>')
+      .replace(/`(.+?)`/g, '<code>$1</code>')
+      .replace(/^> (.+)$/gm, '<blockquote>$1</blockquote>')
+      .replace(/^---$/gm, '<hr>')
+      .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" />')
+      .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
+      .replace(/^- (.+)$/gm, '<li>$1</li>')
+      .replace(/(<li>.*<\/li>\n?)+/g, s => `<ul>${s}</ul>`);
+
+    // Wrap plain text in <p> if not already a block element
+    if (!html.match(/^<(h[1-6]|ul|ol|li|blockquote|hr|img|table)/)) {
+      html = `<p>${html}</p>`;
+    }
+    return html;
+  });
+
+  return injectHeadingIds(processed.join('\n'));
 }
 
 function TableOfContents({ headings, activeId }) {
