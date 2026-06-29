@@ -9,7 +9,8 @@ export default function Compare() {
   const [maxRate, setMaxRate] = useState(48);
   const [minCibil, setMinCibil] = useState(0);
   const [sort, setSort] = useState('rating');
-  const [view, setView] = useState('table'); // 'table' | 'cards'
+  const [view, setView] = useState(window.innerWidth < 640 ? 'cards' : 'table');
+  const [filtersOpen, setFiltersOpen] = useState(window.innerWidth >= 900);
 
   useEffect(() => { api.get('/api/loan-apps').then(r => setLoans(r.data)).catch(() => {}); }, []);
 
@@ -30,8 +31,19 @@ export default function Compare() {
       <style>{`
         .compare-layout { display: grid; grid-template-columns: 280px 1fr; gap: 24px; }
         .compare-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
-        @media(max-width: 900px) { .compare-layout { grid-template-columns: 1fr; } }
+        @media(max-width: 900px) {
+          .compare-layout { grid-template-columns: 1fr; }
+          .compare-sidebar { position: static !important; }
+        }
         @media(max-width: 540px) { .compare-cards { grid-template-columns: 1fr; } }
+        @media(max-width: 640px) {
+          .filter-card { padding: 16px !important; }
+          .filter-sliders { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+          .sort-buttons { display: flex !important; flex-direction: row !important; flex-wrap: wrap; gap: 8px; }
+          .sort-buttons button { flex: 1; min-width: 100px; font-size: 11px !important; padding: 8px 10px !important; }
+          .view-toggle { display: flex; gap: 8px; }
+          .view-toggle button { flex: 1; }
+        }
         .compare-table { width: 100%; border-collapse: collapse; }
         .compare-table th { padding: 12px 14px; text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; color: #fff; font-weight: 700; background: linear-gradient(135deg,#1565C0,#0288D1); white-space: nowrap; }
         .compare-table td { padding: 14px; font-size: 13px; color: #3B5280; border-bottom: 1px solid rgba(21,101,192,0.07); vertical-align: middle; }
@@ -56,11 +68,30 @@ export default function Compare() {
 
       <div style={{ background: '#F0F6FF', minHeight: '80vh', padding: '32px 0' }}>
         <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 16px' }}>
+          {/* Mobile filter toggle */}
+          <div style={{ marginBottom: '16px', display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
+            <button onClick={() => setFiltersOpen(f => !f)}
+              style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '9px 16px', borderRadius: '10px', border: '1.5px solid rgba(21,101,192,0.3)', background: filtersOpen ? 'rgba(21,101,192,0.08)' : '#fff', color: '#1565C0', fontWeight: 600, fontSize: '13px', cursor: 'pointer' }}>
+              🎛️ {filtersOpen ? 'Hide Filters' : 'Show Filters'}
+            </button>
+            <span style={{ fontSize: '13px', color: '#7A90B8' }}>
+              <strong style={{ color: '#1565C0' }}>{filtered.length}</strong> of {loans.length} lenders
+            </span>
+            <div style={{ marginLeft: 'auto', display: 'flex', gap: '8px' }}>
+              {[['table','📋'],['cards','🃏']].map(([val, icon]) => (
+                <button key={val} onClick={() => setView(val)}
+                  style={{ padding: '8px 14px', borderRadius: '8px', border: `1.5px solid ${view === val ? '#1565C0' : 'rgba(21,101,192,0.2)'}`, background: view === val ? '#1565C0' : '#fff', color: view === val ? '#fff' : '#3B5280', fontWeight: 600, fontSize: '13px', cursor: 'pointer' }}>
+                  {icon} {val === 'table' ? 'Table' : 'Cards'}
+                </button>
+              ))}
+            </div>
+          </div>
+
           <div className="compare-layout">
 
             {/* ── FILTERS SIDEBAR ── */}
-            <aside>
-              <div style={{ background: '#fff', borderRadius: '20px', padding: '24px', border: '1px solid rgba(21,101,192,0.12)', boxShadow: '0 4px 20px rgba(21,101,192,0.06)', position: 'sticky', top: '80px' }}>
+            <aside style={{ display: filtersOpen ? 'block' : 'none' }}>
+              <div className="filter-card" style={{ background: '#fff', borderRadius: '20px', padding: '24px', border: '1px solid rgba(21,101,192,0.12)', boxShadow: '0 4px 20px rgba(21,101,192,0.06)', position: 'sticky', top: '80px' }}>
                 <h3 style={{ fontFamily: 'Outfit,sans-serif', fontWeight: 700, fontSize: '16px', color: '#0A1628', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                   🎛️ Filters
                 </h3>
@@ -82,7 +113,7 @@ export default function Compare() {
                 <div style={{ marginBottom: '20px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
                     <label style={{ fontSize: '12px', color: '#7A90B8', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Max Interest Rate</label>
-                    <span style={{ fontSize: '13px', color: '#1565C0', fontWeight: 700, fontFamily: 'JetBrains Mono,monospace' }}>{maxRate}%</span>
+                    <span style={{ fontSize: '14px', color: '#1565C0', fontWeight: 800, fontFamily: 'JetBrains Mono,monospace', background: 'rgba(21,101,192,0.08)', padding: '2px 8px', borderRadius: '6px' }}>{maxRate}%</span>
                   </div>
                   <input type="range" min="9" max="48" step="1" value={maxRate} onChange={e => setMaxRate(+e.target.value)} />
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '4px' }}>
@@ -95,7 +126,7 @@ export default function Compare() {
                 <div style={{ marginBottom: '20px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
                     <label style={{ fontSize: '12px', color: '#7A90B8', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Your CIBIL Score</label>
-                    <span style={{ fontSize: '13px', color: '#1565C0', fontWeight: 700, fontFamily: 'JetBrains Mono,monospace' }}>{minCibil === 0 ? 'Any' : minCibil}</span>
+                    <span style={{ fontSize: '14px', color: '#1565C0', fontWeight: 800, fontFamily: 'JetBrains Mono,monospace', background: 'rgba(21,101,192,0.08)', padding: '2px 8px', borderRadius: '6px' }}>{minCibil === 0 ? 'Any' : minCibil}</span>
                   </div>
                   <input type="range" min="0" max="900" step="10" value={minCibil} onChange={e => setMinCibil(+e.target.value)} />
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '4px' }}>
@@ -107,7 +138,7 @@ export default function Compare() {
                 {/* Sort */}
                 <div style={{ marginBottom: '20px' }}>
                   <label style={{ fontSize: '12px', color: '#7A90B8', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: '8px' }}>Sort By</label>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <div className="sort-buttons" style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                     {[['rating','⭐ Best Rated'],['rate','📉 Lowest Rate'],['amount','💰 Highest Amount']].map(([val, label]) => (
                       <button key={val} onClick={() => setSort(val)}
                         style={{ padding: '10px 14px', borderRadius: '10px', border: `1.5px solid ${sort === val ? '#1565C0' : 'rgba(21,101,192,0.15)'}`, background: sort === val ? 'rgba(21,101,192,0.08)' : 'transparent', color: sort === val ? '#1565C0' : '#3B5280', fontSize: '13px', fontWeight: sort === val ? 700 : 500, cursor: 'pointer', textAlign: 'left', transition: 'all 0.15s' }}>
@@ -120,7 +151,7 @@ export default function Compare() {
                 {/* View toggle */}
                 <div>
                   <label style={{ fontSize: '12px', color: '#7A90B8', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: '8px' }}>View</label>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                  <div className="view-toggle" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
                     {[['table','📋 Table'],['cards','🃏 Cards']].map(([val, label]) => (
                       <button key={val} onClick={() => setView(val)}
                         style={{ padding: '8px', borderRadius: '8px', border: `1.5px solid ${view === val ? '#1565C0' : 'rgba(21,101,192,0.15)'}`, background: view === val ? '#1565C0' : 'transparent', color: view === val ? '#fff' : '#3B5280', fontSize: '12px', fontWeight: 600, cursor: 'pointer', transition: 'all 0.15s' }}>
