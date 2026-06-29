@@ -73,31 +73,32 @@ function markdownToHtml(text) {
 function TableOfContents({ headings, activeId, onHeadingClick }) {
   if (!headings.length) return null;
   return (
-    <div style={{ background: '#fff', border: '1px solid rgba(21,101,192,0.15)', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 4px 20px rgba(21,101,192,0.08)' }}>
+    <div style={{ background: '#fff', border: '1px solid rgba(21,101,192,0.15)', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 4px 20px rgba(21,101,192,0.08)', width: '100%', boxSizing: 'border-box' }}>
       <div style={{ background: 'linear-gradient(135deg, #1565C0, #0288D1)', padding: '14px 20px' }}>
-        <div style={{ color: '#fff', fontSize: '10px', fontFamily: 'JetBrains Mono, monospace', textTransform: 'uppercase', letterSpacing: '0.2em', fontWeight: 700 }}>📋 Table of Contents</div>
+        <div style={{ color: '#fff', fontSize: '11px', fontFamily: 'JetBrains Mono, monospace', textTransform: 'uppercase', letterSpacing: '0.2em', fontWeight: 700 }}>📋 Table of Contents</div>
       </div>
-      <nav style={{ padding: '12px' }}>
+      <nav style={{ padding: '8px' }}>
         {headings.map((h, i) => (
           <a key={i} href={`#${h.id}`}
             onClick={e => { e.preventDefault(); onHeadingClick && onHeadingClick(h.id); }}
             style={{
               display: 'block',
-              fontSize: '12px',
-              padding: h.level === 3 ? '7px 12px 7px 24px' : '8px 12px',
+              fontSize: '13px',
+              padding: h.level === 3 ? '8px 14px 8px 28px' : '10px 14px',
               borderRadius: '8px',
               marginBottom: '2px',
               textDecoration: 'none',
               cursor: 'pointer',
-              fontWeight: activeId === h.id ? 600 : 400,
+              fontWeight: activeId === h.id ? 700 : 400,
               color: activeId === h.id ? '#1565C0' : '#3B5280',
               background: activeId === h.id ? 'rgba(21,101,192,0.08)' : 'transparent',
               borderLeft: activeId === h.id && h.level === 2 ? '3px solid #1565C0' : '3px solid transparent',
               transition: 'all 0.15s ease',
+              lineHeight: 1.4,
             }}
-            onMouseEnter={e => { if (activeId !== h.id) e.currentTarget.style.background = 'rgba(21,101,192,0.04)'; }}
-            onMouseLeave={e => { if (activeId !== h.id) e.currentTarget.style.background = 'transparent'; }}>
-            {h.level === 3 && <span style={{ color: '#94A3B8', marginRight: '4px', fontSize: '10px' }}>└</span>}
+            onMouseEnter={e => { if (activeId !== h.id) { e.currentTarget.style.background = 'rgba(21,101,192,0.04)'; e.currentTarget.style.color = '#1565C0'; } }}
+            onMouseLeave={e => { if (activeId !== h.id) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#3B5280'; } }}>
+            {h.level === 3 && <span style={{ color: '#94A3B8', marginRight: '6px', fontSize: '11px' }}>└</span>}
             {h.text}
           </a>
         ))}
@@ -388,11 +389,16 @@ export default function BlogPost() {
 
           {/* Mobile TOC — shown on mobile since sidebar is hidden */}
           {headings.length > 0 && (
-            <div className="blog-mobile-toc mb-8" style={{ display: 'none' }}>
+            <div className="blog-mobile-toc" style={{ display: 'none', marginBottom: '20px', width: '100%' }}>
               <TableOfContents headings={headings} activeId={activeId} onHeadingClick={scrollToHeading} />
             </div>
           )}
-          <style>{`@media(max-width:1023px){.blog-mobile-toc{display:block !important}}`}</style>
+          <style>{`
+            @media(max-width:1023px){
+              .blog-mobile-toc{ display:block !important; width:100% !important; }
+              .blog-mobile-toc > *{ width:100% !important; border-radius:12px !important; }
+            }
+          `}</style>
 
           {/* ARTICLE BODY */}
           <div className="blog-content mb-8" dangerouslySetInnerHTML={{ __html: contentHtml }} />
