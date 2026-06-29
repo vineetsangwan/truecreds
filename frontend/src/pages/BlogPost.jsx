@@ -321,11 +321,21 @@ export default function BlogPost() {
         `}</style>
       </div>
 
-      {/* MAIN CONTENT — fixed sidebars, only article scrolls */}
-      <div style={{ background: '#fff', display: 'flex', height: 'calc(100vh - 64px)', position: 'sticky', top: '64px', borderTop: '1px solid rgba(21,101,192,0.08)' }}>
+      {/* MAIN CONTENT — fixed sidebars on desktop, full width on mobile */}
+      <div className="blog-main-wrap" style={{ background: '#fff', display: 'flex', borderTop: '1px solid rgba(21,101,192,0.08)' }}>
+      <style>{`
+        @media(min-width:1024px){
+          .blog-main-wrap{ height:calc(100vh - 64px); position:sticky; top:64px; }
+        }
+        @media(max-width:1023px){
+          .blog-main-wrap{ flex-direction:column; }
+          .blog-left-sidebar,.blog-right-sidebar{ display:none !important; }
+          .blog-article{ padding:24px 16px !important; overflow-y:visible !important; height:auto !important; }
+        }
+      `}</style>
 
         {/* LEFT SIDEBAR — fixed, never scrolls */}
-        <aside className="hidden lg:flex flex-col" style={{ width: '300px', flexShrink: 0, height: '100%', overflowY: 'auto', borderRight: '1px solid rgba(21,101,192,0.1)', scrollbarWidth: 'none', background: '#F8FAFF' }}>
+        <aside className="blog-left-sidebar" style={{ width: '300px', flexShrink: 0, height: '100%', overflowY: 'auto', borderRight: '1px solid rgba(21,101,192,0.1)', scrollbarWidth: 'none', background: '#F8FAFF' }}>
           <div className="p-5 space-y-5">
             <TableOfContents headings={headings} activeId={activeId} onHeadingClick={scrollToHeading} />
             <div style={{ background: 'linear-gradient(135deg, #0D47A1, #1565C0, #0288D1)', borderRadius: '16px', padding: '20px', textAlign: 'center', boxShadow: '0 8px 32px rgba(21,101,192,0.25)' }}>
@@ -340,12 +350,13 @@ export default function BlogPost() {
         {/* CENTER — ONLY this scrolls */}
         <main style={{ flex: 1, minWidth: 0, height: '100%', overflowY: 'auto', padding: '48px 64px', background: '#fff' }} ref={contentRef}>
 
-          {/* Mobile TOC */}
+          {/* Mobile TOC — shown on mobile since sidebar is hidden */}
           {headings.length > 0 && (
-            <div className="lg:hidden mb-8">
+            <div className="blog-mobile-toc mb-8" style={{ display: 'none' }}>
               <TableOfContents headings={headings} activeId={activeId} onHeadingClick={scrollToHeading} />
             </div>
           )}
+          <style>{`@media(max-width:1023px){.blog-mobile-toc{display:block !important}}`}</style>
 
           {/* ARTICLE BODY */}
           <div className="blog-content mb-8" dangerouslySetInnerHTML={{ __html: contentHtml }} />
@@ -402,7 +413,7 @@ export default function BlogPost() {
         </main>
 
         {/* RIGHT SIDEBAR — fixed, never scrolls */}
-        <aside className="hidden lg:flex flex-col" style={{ width: '320px', flexShrink: 0, height: '100%', overflowY: 'auto', borderLeft: '1px solid rgba(21,101,192,0.1)', scrollbarWidth: 'none', background: '#F8FAFF' }}>
+        <aside className="blog-right-sidebar" style={{ width: '320px', flexShrink: 0, height: '100%', overflowY: 'auto', borderLeft: '1px solid rgba(21,101,192,0.1)', scrollbarWidth: 'none', background: '#F8FAFF' }}>
           <div className="p-5 space-y-5">
             <EligibilityForm compact />
 
