@@ -73,7 +73,7 @@ function markdownToHtml(text) {
 function TableOfContents({ headings, activeId, onHeadingClick }) {
   if (!headings.length) return null;
   return (
-    <div style={{ background: '#fff', border: '1px solid rgba(21,101,192,0.15)', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 4px 20px rgba(21,101,192,0.08)', width: '100%', boxSizing: 'border-box' }}>
+    <div className="toc-container" style={{ background: '#fff', border: '1px solid rgba(21,101,192,0.15)', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 4px 20px rgba(21,101,192,0.08)', width: '100%', boxSizing: 'border-box' }}>
       <div style={{ background: 'linear-gradient(135deg, #1565C0, #0288D1)', padding: '14px 20px' }}>
         <div style={{ color: '#fff', fontSize: '11px', fontFamily: 'JetBrains Mono, monospace', textTransform: 'uppercase', letterSpacing: '0.2em', fontWeight: 700 }}>📋 Table of Contents</div>
       </div>
@@ -334,10 +334,29 @@ export default function BlogPost() {
         </div>
 
         <style>{`
-          @media(max-width:640px){
-            .hero-content-block{ max-width:100% !important; width:100% !important; }
-          }
-        `}</style>
+        /* Desktop — sticky 3 panel */
+        @media(min-width:1024px){
+          .blog-main-wrap{ height:calc(100vh - 64px); position:sticky; top:64px; }
+          .blog-article{ overflow-y:auto; height:100%; padding:40px 48px; }
+        }
+        /* Mobile — full width, zero wasted space, BankCreds style */
+        @media(max-width:1023px){
+          .blog-main-wrap{ flex-direction:column !important; height:auto !important; position:static !important; overflow:visible !important; }
+          .blog-left-sidebar,.blog-right-sidebar{ display:none !important; }
+          .blog-article{ padding:0 !important; overflow-y:visible !important; height:auto !important; width:100% !important; box-sizing:border-box !important; }
+          .blog-mobile-toc{ display:block !important; width:100% !important; margin:0 !important; }
+          .blog-mobile-toc .toc-container{ border-radius:0 !important; border-left:none !important; border-right:none !important; box-shadow:none !important; }
+          .blog-article-header{ padding:20px 16px 16px !important; }
+          .blog-content{ padding:0 16px 32px !important; font-size:15px !important; line-height:1.8 !important; }
+          .blog-content h2{ font-size:1.3rem !important; margin-top:28px !important; }
+          .blog-content h3{ font-size:1.1rem !important; margin-top:20px !important; }
+          .blog-content p{ margin-bottom:16px !important; }
+        }
+        @media(max-width:480px){
+          .blog-content{ font-size:14px !important; line-height:1.75 !important; }
+          .blog-content h2{ font-size:1.2rem !important; }
+        }
+      `}</style>
       </div>
 
       {/* MAIN CONTENT — sticky 3-panel on desktop, normal scroll on mobile */}
