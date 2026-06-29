@@ -138,7 +138,7 @@ function EmiCalculator() {
   const pct = Math.round((interest / total) * 100);
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '32px', alignItems: 'center' }}>
+    <div className="emi-calc-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px', alignItems: 'center' }}>
       <div>
         {[
           { label: 'Loan Amount', val: amount, set: setAmount, min: 10000, max: 2000000, step: 10000, fmt: v => v >= 100000 ? `₹${(v/100000).toFixed(1)}L` : `₹${(v/1000).toFixed(0)}K` },
@@ -222,9 +222,11 @@ function LoanSlider() {
   return (
     <div>
       <div style={{ background: 'linear-gradient(135deg, #E8F0FB, #F0F6FF)', borderRadius: '16px', padding: '24px', marginBottom: '24px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-          <span style={{ fontSize: '14px', color: '#3B5280', fontWeight: 500 }}>How much do you need?</span>
-          <span style={{ fontSize: '28px', fontWeight: 900, color: '#1565C0', fontFamily: 'Outfit,sans-serif' }}>{formatAmt(amount)}</span>
+        <div style={{ marginBottom: '16px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px' }}>
+            <span style={{ fontSize: '14px', color: '#3B5280', fontWeight: 500 }}>How much do you need?</span>
+            <span style={{ fontSize: '22px', fontWeight: 900, color: '#1565C0', fontFamily: 'Outfit,sans-serif', whiteSpace: 'nowrap', flexShrink: 0 }}>{formatAmt(amount)}</span>
+          </div>
         </div>
         <input type="range" min={500} max={MAX} step={500} value={amount}
           onChange={e => setAmount(Number(e.target.value))}
@@ -237,7 +239,7 @@ function LoanSlider() {
       <div style={{ marginBottom: '12px', fontSize: '13px', color: '#3B5280' }}>
         <span style={{ fontWeight: 700, color: '#1565C0', fontSize: '18px' }}>{eligible.length}</span> lenders can give you {formatAmt(amount)}
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: '10px' }}>
+      <div className="lender-avail-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: '10px' }}>
         {LENDER_DATA.map(l => {
           const ok = amount >= l.min && amount <= l.max;
           return (
@@ -354,6 +356,9 @@ export default function Home() {
         @media(max-width:860px){.faq-cta-grid{grid-template-columns:1fr!important}}
         .partners-grid{grid-template-columns:repeat(5,1fr)!important}
         @media(max-width:640px){.partners-grid{grid-template-columns:repeat(3,1fr)!important}}
+        .emi-calc-grid{grid-template-columns:1fr 1fr!important}
+        @media(max-width:700px){.emi-calc-grid{grid-template-columns:1fr!important}}
+        @media(max-width:480px){.lender-avail-grid{grid-template-columns:repeat(2,1fr)!important}}
         .ticker-inner{display:flex;animation:ticker 30s linear infinite;width:max-content}
         .ticker-inner:hover{animation-play-state:paused}
         .home-pad{padding-left:16px;padding-right:16px}
@@ -518,10 +523,10 @@ export default function Home() {
             {[['01', 'Tell us what you need', 'Share loan amount, employment type and CIBIL. Takes 90 seconds.', '📝'],
               ['02', 'We match top lenders', 'Our algorithm ranks lenders by your profile — highest approval odds first.', '🎯'],
               ['03', 'Apply with one tap', 'Click Apply on your preferred lender. Fully guided from start to disbursal.', '✅']].map(([num, title, desc, icon], i) => (
-              <motion.div key={num} className="card-cosmic" style={{ position: 'relative', textAlign: 'center', padding: '32px 24px' }}
+              <motion.div key={num} className="card-cosmic" style={{ textAlign: 'center', padding: '32px 24px' }}
                 initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.12 }}>
                 <div style={{ width: '56px', height: '56px', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', fontSize: '24px', background: 'rgba(21,101,192,0.08)', border: '1px solid rgba(21,101,192,0.2)' }}>{icon}</div>
-                <div style={{ position: 'absolute', top: '-10px', right: '-10px', width: '28px', height: '28px', borderRadius: '50%', background: '#1565C0', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 900, fontFamily: 'monospace' }}>{num}</div>
+                <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#1565C0', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 900, fontFamily: 'monospace', margin: '0 auto 12px' }}>{num}</div>
                 <h3 style={{ fontFamily: 'Outfit,sans-serif', fontWeight: 700, fontSize: '15px', color: '#0A1628', marginBottom: '8px' }}>{title}</h3>
                 <p style={{ fontSize: '13px', lineHeight: 1.6, color: '#7A90B8' }}>{desc}</p>
               </motion.div>
