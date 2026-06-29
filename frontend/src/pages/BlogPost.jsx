@@ -362,31 +362,31 @@ export default function BlogPost() {
       {/* MAIN CONTENT — sticky 3-panel on desktop, normal scroll on mobile */}
       <div className="blog-main-wrap" style={{ background: '#fff', display: 'flex', borderTop: '1px solid rgba(21,101,192,0.08)' }}>
       <style>{`
-        /* Desktop — sticky 3 panel */
+        /* ── DESKTOP: sticky 3-panel ── */
         @media(min-width:1024px){
           .blog-main-wrap{ height:calc(100vh - 64px); position:sticky; top:64px; }
-          .blog-article{ overflow-y:auto; height:100%; }
+          .blog-article{ overflow-y:auto; height:100%; padding:40px 48px; }
         }
-        /* Mobile & Tablet — fully normal page scroll, no sticky anything */
+        /* ── MOBILE: full width, edge to edge, no card, no margins ── */
         @media(max-width:1023px){
-          .blog-main-wrap{
-            flex-direction:column;
-            height:auto !important;
-            position:static !important;
-            overflow:visible !important;
-          }
+          .blog-main-wrap{ flex-direction:column !important; height:auto !important; position:static !important; overflow:visible !important; background:#fff !important; }
           .blog-left-sidebar,.blog-right-sidebar{ display:none !important; }
-          .blog-article{
-            height:auto !important;
-            overflow-y:visible !important;
-            padding:20px 12px !important;
-          }
-        }
-        @media(min-width:480px) and (max-width:1023px){
-          .blog-article{ padding:28px 20px !important; }
+          .blog-article{ height:auto !important; overflow-y:visible !important; padding:0 !important; width:100% !important; background:#fff !important; }
+          .blog-mobile-toc{ display:block !important; width:100% !important; margin:0 !important; }
+          .blog-mobile-toc .toc-container{ border-radius:0 !important; border-left:none !important; border-right:none !important; box-shadow:none !important; border-top:none !important; }
+          .blog-article-title{ padding:20px 16px 0 !important; }
+          .blog-content{ padding:0 16px 40px !important; font-size:15px !important; line-height:1.85 !important; color:#1e293b !important; }
+          .blog-content h2{ font-size:1.25rem !important; font-weight:700 !important; color:#0f172a !important; margin-top:32px !important; margin-bottom:12px !important; }
+          .blog-content h3{ font-size:1.05rem !important; font-weight:600 !important; margin-top:24px !important; margin-bottom:8px !important; }
+          .blog-content p{ margin-bottom:18px !important; }
+          .blog-content ul,.blog-content ol{ padding-left:20px !important; margin-bottom:16px !important; }
+          .blog-content table{ font-size:13px !important; }
+          .blog-tags-share{ padding:12px 16px !important; }
+          .blog-summary-card{ margin:0 16px 20px !important; }
+          .blog-related{ padding:20px 16px !important; }
         }
         @media(max-width:480px){
-          .blog-content { font-size:14px; line-height:1.75; }
+          .blog-content{ font-size:14px !important; line-height:1.8 !important; }
         }
       `}</style>
 
@@ -404,26 +404,21 @@ export default function BlogPost() {
         </aside>
 
         {/* CENTER — ONLY this scrolls */}
-        <main style={{ flex: 1, minWidth: 0, height: '100%', overflowY: 'auto', padding: '48px 64px', background: '#fff' }} ref={contentRef}>
+        <main className="blog-article" ref={contentRef} style={{ flex: 1, minWidth: 0, background: '#fff' }}>
 
           {/* Mobile TOC — shown on mobile since sidebar is hidden */}
           {headings.length > 0 && (
-            <div className="blog-mobile-toc" style={{ display: 'none', marginBottom: '20px', width: '100%' }}>
+            <div className="blog-mobile-toc" style={{ width: '100%' }}>
               <TableOfContents headings={headings} activeId={activeId} onHeadingClick={scrollToHeading} />
             </div>
           )}
-          <style>{`
-            @media(max-width:1023px){
-              .blog-mobile-toc{ display:block !important; width:100% !important; }
-              .blog-mobile-toc > *{ width:100% !important; border-radius:12px !important; }
-            }
-          `}</style>
+
 
           {/* ARTICLE BODY */}
           <div className="blog-content mb-8" dangerouslySetInnerHTML={{ __html: contentHtml }} />
 
           {/* TAGS */}
-          <div className="rounded-2xl p-5 mb-6" style={{ border: '1px solid rgba(21,101,192,0.12)' }}>
+          <div className="blog-tags-share rounded-2xl p-5 mb-6" style={{ border: '1px solid rgba(21,101,192,0.12)' }}>
             <div className="flex flex-wrap gap-2 mb-4">
               {['Personal Loan', 'India', 'CIBIL', 'Finance Tips', post.category].filter(Boolean).map(tag => (
                 <span key={tag} className="px-3 py-1 rounded-full text-xs font-medium"
@@ -436,7 +431,7 @@ export default function BlogPost() {
           </div>
 
           {/* AUTHOR */}
-          <div className="rounded-2xl p-5 flex gap-4 mb-10" style={{ border: '1px solid rgba(21,101,192,0.12)' }}>
+          <div className="blog-summary-card rounded-2xl p-5 flex gap-4 mb-10" style={{ border: '1px solid rgba(21,101,192,0.12)' }}>
             <div className="w-12 h-12 rounded-xl flex items-center justify-center text-xl flex-shrink-0" style={{ background: 'linear-gradient(135deg, #1565C0, #0288D1)' }}>✅</div>
             <div>
               <div className="font-semibold text-sm mb-1" style={{ color: '#0A1628' }}>TrueCreds Editorial Team</div>
