@@ -245,11 +245,47 @@ function BlogTab() {
           </div>
         </div>
 
-        {/* Cover Image */}
+        {/* Cover Image — Thumbnail */}
         <div>
-          <label className="text-xs text-slate-500 uppercase tracking-wider mb-1.5 block">Cover Image URL</label>
-          <input className="input-cosmic" placeholder="https://example.com/image.jpg" value={form.cover_image}
-            onChange={e => set('cover_image', e.target.value)} />
+          <label className="text-xs text-slate-500 uppercase tracking-wider mb-1.5 block">Cover Image (Thumbnail)</label>
+          <div className="flex gap-2 items-center">
+            <input className="input-cosmic flex-1" placeholder="Paste URL or upload from device →" value={form.cover_image}
+              onChange={e => set('cover_image', e.target.value)} />
+            <label className="flex-shrink-0 cursor-pointer px-3 py-2 rounded-lg text-xs font-semibold transition-all"
+              style={{ background: 'rgba(0,255,157,0.1)', color: '#00FF9D', border: '1px solid rgba(0,255,157,0.3)' }}>
+              📁 Upload
+              <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" className="hidden"
+                onChange={async (e) => {
+                  const file = e.target.files[0];
+                  if (!file) return;
+                  if (file.size > 3 * 1024 * 1024) { toast.error('Image must be under 3MB'); return; }
+                  const toastId = toast.loading('Uploading thumbnail...');
+                  try {
+                    const formData = new FormData();
+                    formData.append('file', file);
+                    const token = localStorage.getItem('truecreds_token');
+                    const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/upload-image`, {
+                      method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: formData,
+                    });
+                    const data = await res.json();
+                    if (!res.ok) throw new Error(data.detail || 'Upload failed');
+                    set('cover_image', data.url);
+                    toast.success('Thumbnail uploaded!', { id: toastId });
+                  } catch (err) {
+                    toast.error(err.message || 'Upload failed', { id: toastId });
+                  }
+                  e.target.value = '';
+                }} />
+            </label>
+          </div>
+          {form.cover_image && (
+            <div className="mt-2 relative inline-block">
+              <img src={form.cover_image} alt="Thumbnail preview" className="h-20 w-40 object-cover rounded-lg" style={{ border: '1px solid rgba(0,255,157,0.2)' }} />
+              <button type="button" onClick={() => set('cover_image', '')}
+                className="absolute -top-1 -right-1 w-5 h-5 rounded-full text-[10px] flex items-center justify-center"
+                style={{ background: '#ef4444', color: '#fff' }}>✕</button>
+            </div>
+          )}
         </div>
 
         {/* Content Editor with Toolbar */}
@@ -289,20 +325,35 @@ function BlogTab() {
 
             <div className="w-px h-5 mx-1" style={{ background: 'rgba(255,255,255,0.1)' }} />
 
-            {/* IMAGE INSERT */}
-            <button type="button" title="Insert Image"
-              className="px-2.5 py-1 rounded text-xs font-mono text-slate-400 hover:text-[#00FF9D] hover:bg-[rgba(0,255,157,0.08)] transition-all"
-              onClick={() => {
-                const url = window.prompt('Image URL:', 'https://');
-                if (!url) return;
-                const alt = window.prompt('Alt text (description):', 'Image');
-                const ta = document.getElementById('blog-content-editor');
-                const pos = ta.selectionStart;
-                const insert = `\n![${alt || 'Image'}](${url})\n`;
-                set('content', form.content.substring(0, pos) + insert + form.content.substring(pos));
-              }}>
+            {/* IMAGE UPLOAD FROM DEVICE — inline in content */}
+            <label title="Upload image from device" className="px-2.5 py-1 rounded text-xs font-mono text-slate-400 hover:text-[#00FF9D] hover:bg-[rgba(0,255,157,0.08)] transition-all cursor-pointer">
               🖼 Image
-            </button>
+              <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" className="hidden"
+                onChange={async (e) => {
+                  const file = e.target.files[0];
+                  if (!file) return;
+                  if (file.size > 3 * 1024 * 1024) { toast.error('Image must be under 3MB'); return; }
+                  const toastId = toast.loading('Uploading image...');
+                  try {
+                    const formData = new FormData();
+                    formData.append('file', file);
+                    const token = localStorage.getItem('truecreds_token');
+                    const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/admin/upload-image`, {
+                      method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: formData,
+                    });
+                    const data = await res.json();
+                    if (!res.ok) throw new Error(data.detail || 'Upload failed');
+                    const ta = document.getElementById('blog-content-editor');
+                    const pos = ta ? ta.selectionStart : form.content.length;
+                    const insert = `\n![${file.name.replace(/\.[^.]+$/, '')}](${data.url})\n`;
+                    set('content', form.content.substring(0, pos) + insert + form.content.substring(pos));
+                    toast.success('Image inserted!', { id: toastId });
+                  } catch (err) {
+                    toast.error(err.message || 'Upload failed', { id: toastId });
+                  }
+                  e.target.value = '';
+                }} />
+            </label>
 
             {/* LINK INSERT */}
             <button type="button" title="Insert Link"
