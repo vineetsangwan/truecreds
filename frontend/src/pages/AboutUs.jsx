@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
 const TEAM = [
-  { name: 'Vineet Sangwan', role: 'Founder & CEO', emoji: '👨‍💼', bio: 'Fintech enthusiast with a passion for making financial products transparent and accessible for every Indian borrower.' },
+  { name: 'Founder & CEO', role: 'Leadership', emoji: '👨‍💼', bio: 'Fintech enthusiast with a passion for making financial products transparent and accessible for every Indian borrower.' },
   { name: 'Content Team', role: 'Research & Editorial', emoji: '✍️', bio: 'A dedicated team of finance writers who verify every rate, term and lender claim before it goes live on TrueCreds.' },
   { name: 'Tech Team', role: 'Engineering', emoji: '⚙️', bio: 'Building the comparison engine, real-time rate updates and the tools that help 1.2 lakh+ borrowers every month.' },
 ];
