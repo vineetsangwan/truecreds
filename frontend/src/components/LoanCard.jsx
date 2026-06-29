@@ -6,68 +6,92 @@ export default function LoanCard({ loan, index = 0, highlight = false }) {
   const rating = Math.round(loan.rating);
   return (
     <motion.div
-      className={`relative rounded-2xl p-5 border transition-all duration-300 cursor-default group ${highlight ? '' : ''}`}
       style={{
         background: highlight ? 'linear-gradient(135deg, #EFF6FF, #DBEAFE)' : '#fff',
         border: highlight ? '1.5px solid rgba(21,101,192,0.35)' : '1px solid rgba(21,101,192,0.12)',
         boxShadow: highlight ? '0 8px 32px rgba(21,101,192,0.12)' : '0 2px 12px rgba(21,101,192,0.06)',
+        borderRadius: '16px',
+        padding: '20px',
+        position: 'relative',
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100%',
+        boxSizing: 'border-box',
+        overflow: 'hidden',
       }}
       initial={{ opacity: 0, y: 24 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.06, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-      whileHover={{ y: -4, boxShadow: '0 20px 48px rgba(21,101,192,0.16)', borderColor: 'rgba(21,101,192,0.4)' }}
+      whileHover={{ y: -4, boxShadow: '0 20px 48px rgba(21,101,192,0.16)' }}
     >
+      {/* BEST CHOICE badge */}
       {highlight && (
         <>
-          <div className="absolute -top-3 left-4">
-            <span className="badge-mint text-[9px]">⭐ BEST CHOICE</span>
+          <div style={{ position: 'absolute', top: '-10px', left: '16px' }}>
+            <span className="badge-mint" style={{ fontSize: '9px' }}>⭐ BEST CHOICE</span>
           </div>
-          <div className="absolute inset-0 rounded-2xl pointer-events-none"
-            style={{ background: 'radial-gradient(ellipse at top, rgba(21,101,192,0.05) 0%, transparent 60%)' }} />
+          <div style={{ position: 'absolute', inset: 0, borderRadius: '16px', background: 'radial-gradient(ellipse at top, rgba(21,101,192,0.05) 0%, transparent 60%)', pointerEvents: 'none' }} />
         </>
       )}
-      <div className="flex items-start justify-between mb-4">
-        <div className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-xl flex items-center justify-center text-2xl border"
-            style={{ background: '#EFF6FF', border: '1px solid rgba(21,101,192,0.15)' }}>
+
+      {/* Header — name + rate */}
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '16px', gap: '12px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1, minWidth: 0 }}>
+          <div style={{ width: '44px', height: '44px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '22px', background: '#EFF6FF', border: '1px solid rgba(21,101,192,0.15)', flexShrink: 0 }}>
             {loan.logo_emoji}
           </div>
-          <div>
-            <h3 className="font-bold text-sm" style={{ color: '#0A1628' }}>{loan.name}</h3>
-            <p className="text-xs mt-0.5" style={{ color: '#7A90B8' }}>{loan.tagline}</p>
+          <div style={{ minWidth: 0, flex: 1 }}>
+            <h3 style={{ fontWeight: 700, fontSize: '14px', color: '#0A1628', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{loan.name}</h3>
+            <p style={{ fontSize: '11px', color: '#7A90B8', margin: '2px 0 0', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{loan.tagline}</p>
           </div>
         </div>
-        <div className="text-right">
-          <div className="font-mono-nums font-bold text-xl" style={{ color: '#1565C0' }}>{loan.interest_rate_min}%</div>
-          <div className="text-[9px] uppercase tracking-wider mt-0.5" style={{ color: '#7A90B8' }}>p.a. from</div>
+        {/* Rate — fixed width, no overflow */}
+        <div style={{ textAlign: 'right', flexShrink: 0, minWidth: '60px' }}>
+          <div style={{ fontWeight: 800, fontSize: '20px', color: '#1565C0', lineHeight: 1, fontFamily: 'JetBrains Mono, monospace', whiteSpace: 'nowrap' }}>
+            {loan.interest_rate_min}%
+          </div>
+          <div style={{ fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.08em', color: '#7A90B8', marginTop: '3px', whiteSpace: 'nowrap' }}>P.A. FROM</div>
         </div>
       </div>
-      <div className="grid grid-cols-3 gap-3 mb-4 p-3 rounded-xl" style={{ background: '#F0F6FF', border: '1px solid rgba(21,101,192,0.08)' }}>
-        {[['Range', `${fmtLakh(loan.loan_amount_min)}–${fmtLakh(loan.loan_amount_max)}`],
+
+      {/* Stats grid */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', padding: '12px', borderRadius: '12px', background: '#F0F6FF', border: '1px solid rgba(21,101,192,0.08)', marginBottom: '16px' }}>
+        {[
+          ['Range', `${fmtLakh(loan.loan_amount_min)}–${fmtLakh(loan.loan_amount_max)}`],
           ['Approval', loan.approval_time],
-          ['CIBIL', loan.min_cibil === 0 ? 'Any' : loan.min_cibil]].map(([l, v]) => (
-          <div key={l}>
-            <div className="text-[9px] uppercase tracking-widest mb-1" style={{ color: '#7A90B8' }}>{l}</div>
-            <div className="font-mono-nums text-xs font-semibold" style={{ color: '#0A1628' }}>{v}</div>
+          ['CIBIL', loan.min_cibil === 0 ? 'Any' : String(loan.min_cibil)],
+        ].map(([label, value]) => (
+          <div key={label} style={{ minWidth: 0 }}>
+            <div style={{ fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.12em', color: '#7A90B8', marginBottom: '4px' }}>{label}</div>
+            <div style={{ fontSize: '11px', fontWeight: 600, color: '#0A1628', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{value}</div>
           </div>
         ))}
       </div>
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-1.5">
-          <div className="flex">
-            {[1,2,3,4,5].map(s => <span key={s} className="text-xs" style={{ color: s <= rating ? '#F59E0B' : '#CBD5E1' }}>★</span>)}
+
+      {/* Rating + Apply — pushed to bottom */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 'auto' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <div style={{ display: 'flex' }}>
+            {[1,2,3,4,5].map(s => (
+              <span key={s} style={{ fontSize: '12px', color: s <= rating ? '#F59E0B' : '#CBD5E1' }}>★</span>
+            ))}
           </div>
-          <span className="text-xs" style={{ color: '#7A90B8' }}>{loan.rating} <span style={{ color: '#CBD5E1' }}>({(loan.review_count/1000).toFixed(1)}K)</span></span>
+          <span style={{ fontSize: '11px', color: '#7A90B8' }}>
+            {loan.rating} <span style={{ color: '#CBD5E1' }}>({(loan.review_count/1000).toFixed(1)}K)</span>
+          </span>
         </div>
         <motion.a href={loan.apply_url} target="_blank" rel="noopener noreferrer sponsored"
-          className="btn-mint py-2 px-4 text-xs rounded-lg" whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}>
+          className="btn-mint" style={{ padding: '8px 16px', fontSize: '12px', borderRadius: '10px', whiteSpace: 'nowrap' }}
+          whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}>
           Apply Now →
         </motion.a>
       </div>
+
+      {/* Best for */}
       {loan.best_for && (
-        <div className="mt-3 pt-3 flex items-center gap-1.5" style={{ borderTop: '1px solid rgba(21,101,192,0.08)' }}>
-          <span className="text-[9px] uppercase tracking-wider" style={{ color: '#7A90B8' }}>Best for:</span>
-          <span className="text-[10px]" style={{ color: '#3B5280' }}>{loan.best_for}</span>
+        <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid rgba(21,101,192,0.08)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <span style={{ fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#7A90B8' }}>Best for:</span>
+          <span style={{ fontSize: '11px', color: '#3B5280', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{loan.best_for}</span>
         </div>
       )}
     </motion.div>
