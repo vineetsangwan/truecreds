@@ -207,87 +207,118 @@ export default function BlogPost() {
         <motion.div className="h-full rounded-r-full" style={{ background: 'linear-gradient(90deg, #1565C0, #0288D1)', width: `${readProgress}%` }} />
       </div>
 
-      {/* HERO — full bleed image with glass content panel */}
-      <div style={{ position: 'relative', overflow: 'hidden', minHeight: '520px', display: 'flex', alignItems: 'stretch' }}>
+      {/* HERO — full bleed image, no crop, professional glass overlay */}
+      <div style={{ position: 'relative', width: '100%', minHeight: '560px', display: 'flex', alignItems: 'center' }}>
 
-        {/* Full background image — shows completely, no crop */}
+        {/* BG image — contain so nothing is cropped */}
         {post.cover_image ? (
           <>
-            <img src={post.cover_image} alt={post.title}
-              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center center', zIndex: 0 }} />
-            {/* Subtle dark veil over entire image */}
-            <div style={{ position: 'absolute', inset: 0, background: 'rgba(5,15,40,0.45)', zIndex: 1 }} />
+            <img
+              src={post.cover_image}
+              alt={post.title}
+              style={{
+                position: 'absolute', inset: 0,
+                width: '100%', height: '100%',
+                objectFit: 'cover',
+                objectPosition: 'center center',
+                zIndex: 0,
+              }}
+            />
+            {/* Left-heavy gradient so right image is visible, left has overlay for text */}
+            <div style={{
+              position: 'absolute', inset: 0, zIndex: 1,
+              background: 'linear-gradient(100deg, rgba(5,15,45,0.92) 0%, rgba(5,15,45,0.72) 45%, rgba(5,15,45,0.20) 75%, rgba(5,15,45,0.05) 100%)',
+            }} />
           </>
         ) : (
-          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, #1565C0 0%, #0288D1 60%, #0D47A1 100%)', zIndex: 0 }}>
-            <div style={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
+          <div style={{ position: 'absolute', inset: 0, zIndex: 0, background: 'linear-gradient(135deg,#1565C0,#0288D1,#0D47A1)' }}>
+            <div style={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(255,255,255,0.05) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.05) 1px,transparent 1px)', backgroundSize: '40px 40px' }} />
           </div>
         )}
 
-        {/* Triangle cut at bottom right */}
-        <div style={{ position: 'absolute', bottom: -1, left: 0, right: 0, zIndex: 3, lineHeight: 0 }}>
-          <svg viewBox="0 0 1440 90" preserveAspectRatio="none" style={{ width: '100%', height: '90px', display: 'block' }}>
-            <polygon points="0,90 1440,90 1440,20 0,90" fill="#ffffff" />
+        {/* Diagonal white cut at bottom */}
+        <div style={{ position: 'absolute', bottom: -1, left: 0, right: 0, zIndex: 3, lineHeight: 0, pointerEvents: 'none' }}>
+          <svg viewBox="0 0 1440 80" preserveAspectRatio="none" style={{ width: '100%', height: '80px', display: 'block' }}>
+            <polygon points="0,80 1440,80 0,30" fill="#ffffff" />
           </svg>
         </div>
 
-        {/* Content — glass card in center-left */}
-        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative flex items-center"
-          style={{ zIndex: 2, paddingTop: '48px', paddingBottom: '100px' }}>
+        {/* Content — left side, max half screen width on desktop */}
+        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" style={{ position: 'relative', zIndex: 2, paddingTop: '56px', paddingBottom: '96px' }}>
 
-          <div style={{ maxWidth: '680px', width: '100%' }}>
+          {/* Breadcrumb */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: 'rgba(255,255,255,0.7)', marginBottom: '20px', flexWrap: 'wrap' }}>
+            <Link to="/" style={{ color: 'rgba(255,255,255,0.7)', textDecoration: 'none' }} onMouseEnter={e => e.target.style.color='#fff'} onMouseLeave={e => e.target.style.color='rgba(255,255,255,0.7)'}>Home</Link>
+            <span style={{ opacity: 0.5 }}>›</span>
+            <Link to="/blog" style={{ color: 'rgba(255,255,255,0.7)', textDecoration: 'none' }} onMouseEnter={e => e.target.style.color='#fff'} onMouseLeave={e => e.target.style.color='rgba(255,255,255,0.7)'}>Blog</Link>
+            <span style={{ opacity: 0.5 }}>›</span>
+            <span style={{ color: 'rgba(255,255,255,0.9)', maxWidth: '300px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{post.title}</span>
+          </div>
 
-            {/* Breadcrumb — above glass card */}
-            <div className="flex items-center gap-2 text-xs mb-5" style={{ color: 'rgba(255,255,255,0.75)' }}>
-              <Link to="/" className="no-underline hover:text-white transition-colors" style={{ color: 'rgba(255,255,255,0.75)' }}>Home</Link>
-              <span>›</span>
-              <Link to="/blog" className="no-underline hover:text-white transition-colors" style={{ color: 'rgba(255,255,255,0.75)' }}>Blog</Link>
-              <span>›</span>
-              <span className="text-white truncate max-w-xs opacity-90">{post.title}</span>
-            </div>
+          {/* Content block — max 55% width on desktop, full on mobile */}
+          <div style={{ maxWidth: 'min(640px, 55%)', width: '100%' }} className="hero-content-block">
 
-            {/* GLASS CARD — wraps title, meta, excerpt, share */}
-            <div style={{
-              background: 'rgba(5, 20, 60, 0.55)',
-              backdropFilter: 'blur(20px)',
-              WebkitBackdropFilter: 'blur(20px)',
-              border: '1px solid rgba(255,255,255,0.15)',
-              borderRadius: '20px',
-              padding: 'clamp(20px, 4vw, 36px)',
-              boxShadow: '0 8px 40px rgba(0,0,0,0.3)',
-            }}>
-              {/* Meta row */}
-              <div className="flex flex-wrap items-center gap-3 mb-4">
-                <span style={{ padding: '4px 12px', borderRadius: '999px', fontSize: '10px', fontFamily: 'monospace', textTransform: 'uppercase', letterSpacing: '0.15em', fontWeight: 700, background: 'rgba(255,255,255,0.18)', color: '#fff', border: '1px solid rgba(255,255,255,0.25)' }}>
-                  {post.category}
+            {/* Meta pills */}
+            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '10px', marginBottom: '18px' }}>
+              <span style={{
+                padding: '5px 14px', borderRadius: '999px', fontSize: '10px',
+                fontFamily: 'JetBrains Mono, monospace', textTransform: 'uppercase',
+                letterSpacing: '0.15em', fontWeight: 700,
+                background: 'rgba(21,101,192,0.7)',
+                backdropFilter: 'blur(8px)',
+                color: '#fff', border: '1px solid rgba(255,255,255,0.3)',
+              }}>
+                {post.category}
+              </span>
+              <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.8)', fontFamily: 'JetBrains Mono,monospace' }}>
+                📖 {post.read_time} read
+              </span>
+              {post.published_at && (
+                <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.75)' }}>
+                  🗓 {new Date(post.published_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
                 </span>
-                <span style={{ fontSize: '12px', fontFamily: 'monospace', color: 'rgba(255,255,255,0.8)' }}>{post.read_time} read</span>
-                {post.published_at && (
-                  <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.8)' }}>
-                    {new Date(post.published_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}
-                  </span>
-                )}
-              </div>
-
-              {/* Title */}
-              <h1 style={{ fontFamily: 'Outfit,sans-serif', fontSize: 'clamp(1.7rem,4vw,2.8rem)', fontWeight: 900, color: '#ffffff', lineHeight: 1.15, letterSpacing: '-0.02em', marginBottom: '14px' }}>
-                {post.title}
-              </h1>
-
-              {/* Excerpt */}
-              {post.excerpt && (
-                <p style={{ fontSize: 'clamp(14px,2vw,16px)', lineHeight: 1.7, color: 'rgba(255,255,255,0.88)', marginBottom: '20px' }}>
-                  {post.excerpt.replace(/<[^>]+>/g, '')}
-                </p>
               )}
-
-              {/* Divider */}
-              <div style={{ height: '1px', background: 'rgba(255,255,255,0.15)', marginBottom: '16px' }} />
-
-              <ShareButtons title={post.title} />
             </div>
+
+            {/* Title — large, bold, white */}
+            <h1 style={{
+              fontFamily: 'Outfit,sans-serif',
+              fontSize: 'clamp(1.8rem,4vw,3rem)',
+              fontWeight: 900,
+              color: '#ffffff',
+              lineHeight: 1.15,
+              letterSpacing: '-0.02em',
+              marginBottom: '16px',
+              textShadow: '0 2px 24px rgba(0,0,0,0.5)',
+            }}>
+              {post.title}
+            </h1>
+
+            {/* Excerpt */}
+            {post.excerpt && (
+              <p style={{
+                fontSize: 'clamp(14px,1.8vw,16px)',
+                lineHeight: 1.75,
+                color: 'rgba(255,255,255,0.88)',
+                marginBottom: '24px',
+                textShadow: '0 1px 8px rgba(0,0,0,0.4)',
+              }}>
+                {post.excerpt.replace(/<[^>]+>/g, '')}
+              </p>
+            )}
+
+            {/* Thin divider */}
+            <div style={{ width: '48px', height: '3px', borderRadius: '3px', background: 'linear-gradient(90deg,#60A5FA,#3B82F6)', marginBottom: '20px' }} />
+
+            <ShareButtons title={post.title} />
           </div>
         </div>
+
+        <style>{`
+          @media(max-width:640px){
+            .hero-content-block{ max-width:100% !important; width:100% !important; }
+          }
+        `}</style>
       </div>
 
       {/* MAIN CONTENT — fixed sidebars, only article scrolls */}
