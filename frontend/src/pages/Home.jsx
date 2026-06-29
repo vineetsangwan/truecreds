@@ -141,7 +141,7 @@ function EmiCalculator() {
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '32px', alignItems: 'center' }}>
       <div>
         {[
-          { label: 'Loan Amount', val: amount, set: setAmount, min: 10000, max: 4000000, step: 10000, fmt: v => `₹${(v / 100000).toFixed(1)}L` },
+          { label: 'Loan Amount', val: amount, set: setAmount, min: 10000, max: 2000000, step: 10000, fmt: v => v >= 100000 ? `₹${(v/100000).toFixed(v>=1000000?1:0)}${v>=1000000?'Cr':'L'}` : `₹${(v/1000).toFixed(0)}K` },
           { label: 'Interest Rate (% p.a.)', val: rate, set: setRate, min: 9, max: 36, step: 0.5, fmt: v => `${v}%` },
           { label: 'Tenure (months)', val: tenure, set: setTenure, min: 3, max: 84, step: 1, fmt: v => `${v} mo` },
         ].map(s => (
@@ -300,7 +300,7 @@ function LoanQuiz() {
       </div>
       <div style={{ fontSize: '11px', color: '#1565C0', fontFamily: 'monospace', textTransform: 'uppercase', marginBottom: '8px' }}>Step {step + 1} of {questions.length}</div>
       <div style={{ fontSize: 'clamp(16px,3vw,20px)', fontWeight: 700, color: '#0A1628', fontFamily: 'Outfit,sans-serif', marginBottom: '20px' }}>{q.q}</div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '10px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '10px' }}>
         {q.options.map(opt => (
           <motion.button key={opt} whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
             onClick={() => {
@@ -309,7 +309,7 @@ function LoanQuiz() {
               if (step < questions.length - 1) setStep(s => s + 1);
               else setResult(getResult(newAnswers));
             }}
-            style={{ padding: '14px 16px', borderRadius: '12px', border: '1.5px solid rgba(21,101,192,0.2)', background: 'rgba(21,101,192,0.04)', color: '#0A1628', fontSize: '14px', fontWeight: 500, cursor: 'pointer', textAlign: 'left', transition: 'all 0.15s' }}
+            style={{ padding: '14px 16px', borderRadius: '12px', border: '1.5px solid rgba(21,101,192,0.2)', background: 'rgba(21,101,192,0.04)', color: '#0A1628', fontSize: '13px', fontWeight: 500, cursor: 'pointer', textAlign: 'center', transition: 'all 0.15s', wordBreak: 'keep-all', whiteSpace: 'normal', lineHeight: 1.3 }}
             onMouseEnter={e => { e.currentTarget.style.borderColor = '#1565C0'; e.currentTarget.style.background = 'rgba(21,101,192,0.08)'; }}
             onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(21,101,192,0.2)'; e.currentTarget.style.background = 'rgba(21,101,192,0.04)'; }}>
             {opt}
@@ -340,6 +340,9 @@ export default function Home() {
         @keyframes float2{0%,100%{transform:translateY(0)}50%{transform:translateY(15px)}}
         @keyframes float3{0%,100%{transform:translateY(0)}33%{transform:translateY(-12px)}66%{transform:translateY(8px)}}
         @keyframes ticker{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+        .loan-grid{grid-template-columns:repeat(3,1fr)!important}
+        @media(max-width:900px){.loan-grid{grid-template-columns:repeat(2,1fr)!important}}
+        @media(max-width:560px){.loan-grid{grid-template-columns:1fr!important}}
         .ticker-inner{display:flex;animation:ticker 30s linear infinite;width:max-content}
         .ticker-inner:hover{animation-play-state:paused}
         .home-pad{padding-left:16px;padding-right:16px}
@@ -445,9 +448,14 @@ export default function Home() {
             </div>
             <Link to="/compare"><button className="btn-ghost" style={{ fontSize: '13px', padding: '8px 18px' }}>See full comparison →</button></Link>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(280px,1fr))', gap: '16px' }}>
-            {loans.slice(0, 6).map((loan, i) => <LoanCard key={loan.id} loan={loan} index={i} highlight={i === 0} />)}
+          <div className='loan-grid' style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '16px', alignItems: 'stretch' }}>
+            {loans.slice(0, 6).map((loan, i) => (
+              <div key={loan.id} style={{ display: 'flex' }}>
+                <LoanCard loan={loan} index={i} highlight={i === 0} />
+              </div>
+            ))}
           </div>
+          <style>{`@media(max-width:900px){.loan-grid{grid-template-columns:repeat(2,1fr)!important}}@media(max-width:580px){.loan-grid{grid-template-columns:1fr!important}}`}</style>
         </div>
       </Section>
 
@@ -459,7 +467,7 @@ export default function Home() {
             <h2 style={{ fontFamily: 'Outfit,sans-serif', fontSize: 'clamp(1.6rem,4vw,2.8rem)', fontWeight: 700, color: '#0A1628' }}>Lenders we compare</h2>
             <p style={{ color: '#7A90B8', fontSize: '14px', marginTop: '8px' }}>All RBI-registered NBFCs and banks. Zero bias.</p>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(120px,1fr))', gap: '12px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(100px,1fr))', gap: '10px' }}>
             {LENDERS.map((l, i) => (
               <motion.div key={l.name} initial={{ opacity: 0, scale: 0.9 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ delay: i * 0.05 }}
                 whileHover={{ scale: 1.05 }}
