@@ -139,11 +139,14 @@ export default function BlogPost() {
   const contentRef = useRef(null);
 
   const scrollToHeading = (id) => {
-    const el = contentRef.current;
-    if (!el) return;
-    const target = el.querySelector(`#${id}`);
-    if (target) {
-      el.scrollTo({ top: target.offsetTop - 20, behavior: 'smooth' });
+    const target = document.getElementById(id);
+    if (!target) return;
+    if (window.innerWidth >= 1024 && contentRef.current) {
+      // Desktop — scroll inside article container
+      contentRef.current.scrollTo({ top: target.offsetTop - 20, behavior: 'smooth' });
+    } else {
+      // Mobile — scroll window
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   };
 
@@ -163,20 +166,35 @@ export default function BlogPost() {
   useEffect(() => {
     const el = contentRef.current;
     if (!el) return;
+    const isDesktop = window.innerWidth >= 1024;
+
     const onScroll = () => {
-      // Track scroll progress of the article container itself
-      const total = el.scrollHeight - el.clientHeight;
-      setReadProgress(total > 0 ? Math.min(100, (el.scrollTop / total) * 100) : 0);
-      // Active heading detection
-      const allH = el.querySelectorAll('h2, h3');
-      let current = '';
-      allH.forEach(h => {
-        if (h.getBoundingClientRect().top <= 120) current = h.id;
-      });
-      if (current) setActiveId(current);
+      if (isDesktop) {
+        // Desktop — track article container scroll
+        const total = el.scrollHeight - el.clientHeight;
+        setReadProgress(total > 0 ? Math.min(100, (el.scrollTop / total) * 100) : 0);
+        const allH = el.querySelectorAll('h2, h3');
+        let current = '';
+        allH.forEach(h => { if (h.getBoundingClientRect().top <= 120) current = h.id; });
+        if (current) setActiveId(current);
+      } else {
+        // Mobile — track window scroll
+        const total = document.documentElement.scrollHeight - window.innerHeight;
+        setReadProgress(total > 0 ? Math.min(100, (window.scrollY / total) * 100) : 0);
+        const allH = el.querySelectorAll('h2, h3');
+        let current = '';
+        allH.forEach(h => { if (h.getBoundingClientRect().top <= 120) current = h.id; });
+        if (current) setActiveId(current);
+      }
     };
-    el.addEventListener('scroll', onScroll);
-    return () => el.removeEventListener('scroll', onScroll);
+
+    if (isDesktop) {
+      el.addEventListener('scroll', onScroll);
+      return () => el.removeEventListener('scroll', onScroll);
+    } else {
+      window.addEventListener('scroll', onScroll, { passive: true });
+      return () => window.removeEventListener('scroll', onScroll);
+    }
   }, [post]);
 
   if (error) return (
@@ -321,16 +339,34 @@ export default function BlogPost() {
         `}</style>
       </div>
 
-      {/* MAIN CONTENT — fixed sidebars on desktop, full width on mobile */}
+      {/* MAIN CONTENT — sticky 3-panel on desktop, normal scroll on mobile */}
       <div className="blog-main-wrap" style={{ background: '#fff', display: 'flex', borderTop: '1px solid rgba(21,101,192,0.08)' }}>
       <style>{`
+        /* Desktop — sticky 3 panel */
         @media(min-width:1024px){
           .blog-main-wrap{ height:calc(100vh - 64px); position:sticky; top:64px; }
+          .blog-article{ overflow-y:auto; height:100%; }
         }
+        /* Mobile & Tablet — fully normal page scroll, no sticky anything */
         @media(max-width:1023px){
-          .blog-main-wrap{ flex-direction:column; }
+          .blog-main-wrap{
+            flex-direction:column;
+            height:auto !important;
+            position:static !important;
+            overflow:visible !important;
+          }
           .blog-left-sidebar,.blog-right-sidebar{ display:none !important; }
-          .blog-article{ padding:24px 16px !important; overflow-y:visible !important; height:auto !important; }
+          .blog-article{
+            height:auto !important;
+            overflow-y:visible !important;
+            padding:20px 12px !important;
+          }
+        }
+        @media(min-width:480px) and (max-width:1023px){
+          .blog-article{ padding:28px 20px !important; }
+        }
+        @media(max-width:480px){
+          .blog-content { font-size:14px; line-height:1.75; }
         }
       `}</style>
 
@@ -471,6 +507,7 @@ export default function BlogPost() {
 
       <style>{`
         .blog-content { color: #334155; font-size: 15px; line-height: 1.85; }
+        @media(max-width:480px){ .blog-content { font-size: 14px; line-height: 1.75; } }
         .blog-content h2 { font-family: Outfit,sans-serif; font-size: 1.6rem; font-weight: 800; color: #0A1628; margin: 2rem 0 1rem; letter-spacing: -0.02em; padding-bottom: 0.75rem; border-bottom: 2px solid rgba(21,101,192,0.15); }
         .blog-content h3 { font-family: Outfit,sans-serif; font-size: 1.15rem; font-weight: 700; color: #1565C0; margin: 1.5rem 0 0.75rem; }
         .blog-content p { margin-bottom: 1.25rem; color: #334155; }
