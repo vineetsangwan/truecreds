@@ -368,6 +368,10 @@ export default function Home() {
         @media(max-width:640px){.home-section{padding:44px 0}}
         input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:5px;border-radius:5px;background:rgba(21,101,192,0.2);outline:none}
         input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:#1565C0;cursor:pointer;box-shadow:0 2px 8px rgba(21,101,192,0.4)}
+        .hero-stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+        .hero-btns{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:36px}
+        @media(max-width:480px){.hero-btns{flex-direction:column}.hero-btns a{width:100% !important;max-width:100% !important}.hero-btns button{width:100% !important}}
+        @media(max-width:480px){.hero-stats-grid{grid-template-columns:repeat(2,1fr);gap:8px}}
       `}</style>
 
       {/* ── 0. HERO ── */}
@@ -375,8 +379,9 @@ export default function Home() {
         <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: 'linear-gradient(rgba(21,101,192,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(21,101,192,0.04) 1px,transparent 1px)', backgroundSize: '50px 50px' }} />
         <div style={{ position: 'absolute', top: 40, right: 40, width: '300px', height: '300px', borderRadius: '50%', background: 'radial-gradient(circle,rgba(21,101,192,0.14),transparent 70%)', filter: 'blur(50px)', animation: 'float1 14s ease-in-out infinite', pointerEvents: 'none' }} />
         <div style={{ position: 'absolute', bottom: 0, left: 0, width: '250px', height: '250px', borderRadius: '50%', background: 'radial-gradient(circle,rgba(2,136,209,0.12),transparent 70%)', filter: 'blur(60px)', animation: 'float2 18s ease-in-out infinite', pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', right: '5%', top: '15%', width: '70px', height: '110px', animation: 'float3 10s ease-in-out infinite', pointerEvents: 'none', display: 'none' }} className="sm:block"><IllustrationPhone /></div>
-        <div style={{ position: 'absolute', left: '3%', bottom: '15%', width: '90px', height: '90px', animation: 'float1 12s ease-in-out infinite', pointerEvents: 'none', display: 'none' }} className="sm:block"><IllustrationCoins /></div>
+        <div style={{ position: 'absolute', right: '4%', top: '12%', width: 'clamp(50px,10vw,90px)', height: 'clamp(80px,16vw,140px)', animation: 'float3 10s ease-in-out infinite', pointerEvents: 'none', zIndex: 1 }}><IllustrationPhone /></div>
+        <div style={{ position: 'absolute', left: '2%', bottom: '12%', width: 'clamp(60px,12vw,110px)', height: 'clamp(60px,12vw,110px)', animation: 'float1 12s ease-in-out infinite', pointerEvents: 'none', zIndex: 1 }}><IllustrationCoins /></div>
+        <div style={{ position: 'absolute', right: '2%', bottom: '8%', width: 'clamp(50px,10vw,80px)', height: 'clamp(60px,12vw,96px)', animation: 'float2 15s ease-in-out infinite', pointerEvents: 'none', zIndex: 1, opacity: 0.6 }}><IllustrationShield /></div>
 
         <div className="w-full max-w-7xl mx-auto home-pad" style={{ paddingTop: '72px', paddingBottom: '72px', position: 'relative', zIndex: 10 }}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(300px,1fr))', gap: '40px', alignItems: 'center' }}>
@@ -398,18 +403,18 @@ export default function Home() {
                 No guesswork. No spam. The clearest side-by-side comparison of India's top loan apps — ranked by rate, speed, and CIBIL flexibility.
               </motion.p>
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
-                style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', marginBottom: '36px' }}>
-                <Link to="/apply"><motion.button className="btn-mint" style={{ fontSize: '14px', padding: '12px 24px', width: '100%', maxWidth: '220px' }} whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}>Check Eligibility — Free</motion.button></Link>
-                <Link to="/compare"><motion.button className="btn-ghost" style={{ fontSize: '14px', padding: '12px 24px' }} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}>Compare All →</motion.button></Link>
+                className="hero-btns">
+                <Link to="/apply" style={{ width: '100%', maxWidth: '240px' }}><motion.button className="btn-mint" style={{ fontSize: '14px', padding: '13px 24px', width: '100%' }} whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}>Check Eligibility — Free</motion.button></Link>
+                <Link to="/compare"><motion.button className="btn-ghost" style={{ fontSize: '14px', padding: '13px 24px' }} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}>Compare All →</motion.button></Link>
               </motion.div>
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}
-                style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '10px' }}>
+                className="hero-stats-grid">
                 {[{ val: 120000, suffix: '+', label: 'Borrowers', isCount: true }, { val: '30 min', label: 'Avg Approval' }, { val: '9.9%', label: 'Starting Rate' }, { val: '12+', label: 'Lenders' }].map((s, i) => (
-                  <motion.div key={i} style={{ textAlign: 'center', padding: '12px 8px', borderRadius: '14px', background: 'rgba(255,255,255,0.7)', border: '1px solid rgba(21,101,192,0.12)' }} whileHover={{ background: 'rgba(21,101,192,0.06)' }}>
-                    <div style={{ fontWeight: 700, fontSize: 'clamp(16px,3vw,20px)', color: '#1565C0' }}>
+                  <motion.div key={i} style={{ textAlign: 'center', padding: '12px 8px', borderRadius: '14px', background: 'rgba(255,255,255,0.7)', border: '1px solid rgba(21,101,192,0.12)', minWidth: 0 }} whileHover={{ background: 'rgba(21,101,192,0.06)' }}>
+                    <div style={{ fontWeight: 800, fontSize: 'clamp(15px,4vw,20px)', color: '#1565C0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                       {s.isCount ? <AnimatedCounter target={s.val} suffix={s.suffix} /> : s.val}
                     </div>
-                    <div style={{ fontSize: '10px', color: '#7A90B8', marginTop: '2px' }}>{s.label}</div>
+                    <div style={{ fontSize: '10px', color: '#7A90B8', marginTop: '2px', whiteSpace: 'nowrap' }}>{s.label}</div>
                   </motion.div>
                 ))}
               </motion.div>
