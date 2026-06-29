@@ -350,8 +350,8 @@ export default function Home() {
         @keyframes float3{0%,100%{transform:translateY(0)}33%{transform:translateY(-12px)}66%{transform:translateY(8px)}}
         @keyframes ticker{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
         .loan-grid{grid-template-columns:repeat(3,1fr)!important}
-        @media(max-width:900px){.loan-grid{grid-template-columns:repeat(2,1fr)!important}}
-        @media(max-width:560px){.loan-grid{grid-template-columns:1fr!important}}
+        @media(max-width:960px){.loan-grid{grid-template-columns:repeat(2,1fr)!important}}
+        @media(max-width:540px){.loan-grid{grid-template-columns:1fr!important}}
         .faq-cta-grid{grid-template-columns:1fr 420px!important}
         @media(max-width:860px){.faq-cta-grid{grid-template-columns:1fr!important}}
         .partners-grid{grid-template-columns:repeat(5,1fr)!important}
@@ -464,13 +464,9 @@ export default function Home() {
             </div>
             <Link to="/compare"><button className="btn-ghost" style={{ fontSize: '13px', padding: '8px 18px' }}>See full comparison →</button></Link>
           </div>
-          <div className='loan-grid' style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '16px' }}>
+          <div className='loan-grid' style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '14px', gridAutoRows: '1fr' }}>
             {loans.slice(0, 6).map((loan, i) => (
-              <div key={loan.id} style={{ display: 'flex', alignItems: 'stretch' }}>
-                <div style={{ width: '100%' }}>
-                  <LoanCard loan={loan} index={i} highlight={i === 0} />
-                </div>
-              </div>
+              <LoanCard key={loan.id} loan={loan} index={i} highlight={i === 0} />
             ))}
           </div>
         </div>
