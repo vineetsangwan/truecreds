@@ -1,11 +1,11 @@
-from fastapi import FastAPI, HTTPException, Depends, BackgroundTasks
+from fastapi import FastAPI, HTTPException, Depends, BackgroundTasks, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from motor.motor_asyncio import AsyncIOMotorClient
 from pydantic import BaseModel, ConfigDict
 from typing import Optional, List
 from datetime import datetime, timezone, timedelta
-import jwt, uuid, os, asyncio, logging, re, time, html as htmllib
+import jwt, uuid, os, asyncio, logging, re, time, html as htmllib, base64
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -175,7 +175,6 @@ async def startup():
 def _build_wp_headers(cfg: dict) -> dict:
     headers = {"Content-Type": "application/json", "Accept": "application/json"}
     if cfg.get("wp_username") and cfg.get("wp_app_password"):
-        import base64
         creds = base64.b64encode(f"{cfg['wp_username']}:{cfg['wp_app_password']}".encode()).decode()
         headers["Authorization"] = f"Basic {creds}"
     return headers
@@ -198,18 +197,11 @@ def _normalize_wp_post(p: dict) -> dict:
     word_count = len(re.findall(r"\w+", content))
     read_time = f"{max(1, word_count // 200)} min"
     return {
-        "id": str(p["id"]),
-        "slug": p["slug"],
-        "title": title,
+        "id": str(p["id"]), "slug": p["slug"], "title": title,
         "excerpt": excerpt[:200] + ("…" if len(excerpt) > 200 else ""),
-        "content": content,
-        "category": "Guide",
-        "read_time": read_time,
-        "cover_image": img,
-        "published_at": p.get("date", ""),
-        "source": "wordpress",
-        "wp_id": p["id"],
-        "wp_link": p.get("link", ""),
+        "content": content, "category": "Guide", "read_time": read_time,
+        "cover_image": img, "published_at": p.get("date", ""),
+        "source": "wordpress", "wp_id": p["id"], "wp_link": p.get("link", ""),
     }
 
 def _fetch_wp_posts_sync(cfg: dict, per_page: int = 12, page: int = 1) -> List[dict]:
@@ -219,8 +211,7 @@ def _fetch_wp_posts_sync(cfg: dict, per_page: int = 12, page: int = 1) -> List[d
     params = {"_embed": 1, "per_page": per_page, "page": page}
     if "wordpress.com" not in base:
         params["status"] = "publish"
-    headers = _build_wp_headers(cfg)
-    r = requests.get(url, params=params, headers=headers, timeout=10)
+    r = requests.get(url, params=params, headers=_build_wp_headers(cfg), timeout=10)
     r.raise_for_status()
     return [_normalize_wp_post(p) for p in r.json()]
 
@@ -252,14 +243,26 @@ async def send_lead_notification(lead: dict):
           </table>
         </div>"""
         await asyncio.to_thread(resend.Emails.send, {
-            "from": SENDER_EMAIL,
-            "to": [ADMIN_NOTIFY_EMAIL],
+            "from": SENDER_EMAIL, "to": [ADMIN_NOTIFY_EMAIL],
             "subject": f"New Lead: {lead.get('full_name', '')} — Rs {amt:,.0f}",
             "html": body_html,
         })
         logger.info(f"Email sent for {lead.get('full_name', '')}")
     except Exception as e:
         logger.error(f"Email failed: {e}")
+
+# ─── IMAGE UPLOAD HELPER ──────────────────────────────────────────────────────
+
+async def process_image_upload(file: UploadFile, max_mb: int = 3) -> str:
+    """Validates, reads and returns base64 data URL. Raises HTTPException on error."""
+    allowed = ["image/jpeg", "image/png", "image/webp", "image/gif"]
+    if file.content_type not in allowed:
+        raise HTTPException(400, "Only JPEG, PNG, WebP and GIF images are allowed")
+    contents = await file.read()
+    if len(contents) > max_mb * 1024 * 1024:
+        raise HTTPException(400, f"Image must be under {max_mb}MB")
+    b64 = base64.b64encode(contents).decode("utf-8")
+    return f"data:{file.content_type};base64,{b64}"
 
 # ─── PUBLIC ROUTES ────────────────────────────────────────────────────────────
 
@@ -273,12 +276,9 @@ async def health():
 
 @app.get("/api/loan-apps")
 async def get_loan_apps(
-    category: Optional[str] = None,
-    location: Optional[str] = None,
-    min_amount: Optional[int] = None,
-    max_rate: Optional[float] = None,
-    min_cibil: Optional[int] = None,
-    sort: Optional[str] = "rating",
+    category: Optional[str] = None, location: Optional[str] = None,
+    min_amount: Optional[int] = None, max_rate: Optional[float] = None,
+    min_cibil: Optional[int] = None, sort: Optional[str] = "rating",
 ):
     q = {}
     if category: q["categories"] = category
@@ -334,11 +334,7 @@ async def get_blog_post(slug: str):
         try:
             import requests
             base = cfg["base_url"].rstrip("/")
-            if "wordpress.com" in base:
-                site = base.replace("https://", "").replace("http://", "")
-                url = f"https://public-api.wordpress.com/wp/v2/sites/{site}/posts"
-            else:
-                url = f"{base}/wp-json/wp/v2/posts"
+            url = f"https://public-api.wordpress.com/wp/v2/sites/{base.replace('https://','').replace('http://','')}/posts" if "wordpress.com" in base else f"{base}/wp-json/wp/v2/posts"
             r = requests.get(url, params={"slug": slug, "_embed": 1}, headers=_build_wp_headers(cfg), timeout=8)
             if r.ok and r.json():
                 return _normalize_wp_post(r.json()[0])
@@ -414,13 +410,8 @@ async def test_wp(body: WpTestRequest, u: str = Depends(verify_token)):
     logs = []
     try:
         is_wpcom = "wordpress.com" in base_url
-        if is_wpcom:
-            site = base_url.replace("https://", "").replace("http://", "")
-            api_url = f"https://public-api.wordpress.com/wp/v2/sites/{site}/posts"
-            logs.append(f"Detected WordPress.com site: {site}")
-        else:
-            api_url = f"{base_url}/wp-json/wp/v2/posts"
-            logs.append(f"Self-hosted WordPress: {base_url}")
+        api_url = f"https://public-api.wordpress.com/wp/v2/sites/{base_url.replace('https://','').replace('http://','')}/posts" if is_wpcom else f"{base_url}/wp-json/wp/v2/posts"
+        logs.append(f"{'WordPress.com' if is_wpcom else 'Self-hosted'}: {base_url}")
         r = requests.get(api_url, params={"per_page": 5}, timeout=10)
         lat = int((time.time() - start) * 1000)
         logs.append(f"HTTP {r.status_code} — {lat}ms")
@@ -428,24 +419,20 @@ async def test_wp(body: WpTestRequest, u: str = Depends(verify_token)):
             posts = r.json()
             pc = len(posts)
             logs.append(f"Posts fetched: {pc}")
-            if pc > 0:
-                logs.append(f"Latest post: {posts[0].get('title', {}).get('rendered', '')[:60]}")
+            if pc > 0: logs.append(f"Latest: {posts[0].get('title', {}).get('rendered', '')[:60]}")
             await db.wp_config.update_one({}, {"$set": {"last_tested": datetime.now(timezone.utc).isoformat(), "last_status": "ok", "last_post_count": pc}}, upsert=True)
             logs.append("Connection successful!")
             return {"ok": True, "logs": logs, "post_count": pc, "latency_ms": lat}
-        else:
-            logs.append(f"Failed: {r.status_code}")
-            return {"ok": False, "logs": logs, "post_count": 0, "latency_ms": lat}
-    except Exception as e:
-        lat = int((time.time() - start) * 1000)
-        logs.append(f"Error: {str(e)}")
+        logs.append(f"Failed: {r.status_code}")
         return {"ok": False, "logs": logs, "post_count": 0, "latency_ms": lat}
+    except Exception as e:
+        logs.append(f"Error: {str(e)}")
+        return {"ok": False, "logs": logs, "post_count": 0, "latency_ms": int((time.time() - start) * 1000)}
 
 @app.post("/api/wp/sync")
 async def sync_wp_posts(u: str = Depends(verify_token)):
     cfg = await db.wp_config.find_one({}, {"_id": 0})
-    if not cfg or not cfg.get("base_url"):
-        raise HTTPException(400, "WordPress not configured")
+    if not cfg or not cfg.get("base_url"): raise HTTPException(400, "WordPress not configured")
     try:
         posts = await _fetch_wp_posts(cfg, 100, 1)
         synced = 0
@@ -464,10 +451,8 @@ async def sync_wp_posts(u: str = Depends(verify_token)):
 @app.post("/api/wp/posts")
 async def create_wp_post(body: WpPostCreate, u: str = Depends(verify_token)):
     cfg = await db.wp_config.find_one({}, {"_id": 0})
-    if not cfg or not cfg.get("base_url"):
-        raise HTTPException(400, "WordPress not configured")
-    if not cfg.get("wp_username") or not cfg.get("wp_app_password"):
-        raise HTTPException(400, "WordPress auth not configured")
+    if not cfg or not cfg.get("base_url"): raise HTTPException(400, "WordPress not configured")
+    if not cfg.get("wp_username") or not cfg.get("wp_app_password"): raise HTTPException(400, "WordPress auth not configured")
     import requests
     payload = {"title": body.title, "content": body.content, "status": body.status or "publish"}
     if body.excerpt: payload["excerpt"] = body.excerpt
@@ -486,6 +471,23 @@ async def get_wp_categories(u: str = Depends(verify_token)):
     except Exception:
         return []
 
+# ─── ADMIN: IMAGE UPLOAD ──────────────────────────────────────────────────────
+
+@app.post("/api/admin/upload-image")
+async def upload_image(file: UploadFile = File(...), u: str = Depends(verify_token)):
+    """Upload image from device — used for both blog thumbnail and inline images."""
+    data_url = await process_image_upload(file, max_mb=3)
+    img_doc = {
+        "id": str(uuid.uuid4()),
+        "filename": file.filename,
+        "content_type": file.content_type,
+        "data_url": data_url,
+        "uploaded_at": datetime.now(timezone.utc).isoformat(),
+    }
+    await db.images.insert_one(img_doc)
+    img_doc.pop("_id", None)
+    return {"success": True, "url": data_url, "id": img_doc["id"], "filename": file.filename}
+
 # ─── ADMIN: BLOG CRUD ─────────────────────────────────────────────────────────
 
 @app.get("/api/admin/blog/posts")
@@ -498,15 +500,9 @@ async def admin_create_blog_post(body: BlogPostCreate, u: str = Depends(verify_t
     existing = await db.blog_posts.find_one({"slug": body.slug})
     if existing: raise HTTPException(400, "A post with this slug already exists")
     post = {
-        "id": str(uuid.uuid4()),
-        "title": body.title,
-        "slug": body.slug,
-        "excerpt": body.excerpt,
-        "content": body.content,
-        "category": body.category,
-        "cover_image": body.cover_image,
-        "read_time": body.read_time,
-        "status": body.status,
+        "id": str(uuid.uuid4()), "title": body.title, "slug": body.slug,
+        "excerpt": body.excerpt, "content": body.content, "category": body.category,
+        "cover_image": body.cover_image, "read_time": body.read_time, "status": body.status,
         "source": "local",
         "published_at": datetime.now(timezone.utc).isoformat(),
         "updated_at": datetime.now(timezone.utc).isoformat(),
@@ -554,7 +550,7 @@ async def system_status(u: str = Depends(verify_token)):
         "database": {"connected": db_ok, "name": DB_NAME, "host": MONGO_URL.split("@")[-1][:30] if "@" in MONGO_URL else "localhost"},
         "wordpress": {"active": wp.get("active", False), "base_url": wp.get("base_url", ""), "last_status": wp.get("last_status", ""), "last_tested": wp.get("last_tested", ""), "post_count": wp.get("last_post_count", 0), "has_auth": bool(wp.get("wp_username"))},
         "email": {"configured": bool(RESEND_API_KEY), "from": SENDER_EMAIL, "to": ADMIN_NOTIFY_EMAIL},
-        "counters": {"total_leads": await db.leads.count_documents({}), "loan_apps": await db.loan_apps.count_documents({}), "blog_posts": await db.blog_posts.count_documents({}), "contacts": await db.contacts.count_documents({}), "version": "2.0.0", "service": "running"},
+        "counters": {"total_leads": await db.leads.count_documents({}), "loan_apps": await db.loan_apps.count_documents({}), "blog_posts": await db.blog_posts.count_documents({}), "contacts": await db.contacts.count_documents({}), "images": await db.images.count_documents({}), "version": "2.0.0", "service": "running"},
     }
 
 if __name__ == "__main__":
