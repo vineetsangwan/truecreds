@@ -776,7 +776,7 @@ export default function Home() {
         </div>
       </Section>
 
-      {/* ── TESTIMONIALS ── */
+      {/* ── TESTIMONIALS ── */}
       <Section className="home-section" style={{ background: '#fff', position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', right: '-15px', top: '30px', width: '120px', height: '120px' }}><IllustrationCoins /></div>
         <div className="w-full max-w-7xl mx-auto home-pad">
