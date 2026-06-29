@@ -9,7 +9,7 @@ export default function Compare() {
   const [maxRate, setMaxRate] = useState(48);
   const [minCibil, setMinCibil] = useState(0);
   const [sort, setSort] = useState('rating');
-  const [view, setView] = useState(window.innerWidth < 640 ? 'cards' : 'table');
+  const [view, setView] = useState('cards');
   const [filtersOpen, setFiltersOpen] = useState(window.innerWidth >= 900);
 
   useEffect(() => { api.get('/api/loan-apps').then(r => setLoans(r.data)).catch(() => {}); }, []);
@@ -36,6 +36,7 @@ export default function Compare() {
           .compare-sidebar { position: static !important; }
         }
         @media(max-width: 540px) { .compare-cards { grid-template-columns: 1fr; } }
+        @media(max-width: 640px) { .desktop-only-btn { display: none !important; } }
         @media(max-width: 640px) {
           .filter-card { padding: 16px !important; }
           .filter-sliders { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
@@ -78,12 +79,16 @@ export default function Compare() {
               <strong style={{ color: '#1565C0' }}>{filtered.length}</strong> of {loans.length} lenders
             </span>
             <div style={{ marginLeft: 'auto', display: 'flex', gap: '8px' }}>
-              {[['table','📋'],['cards','🃏']].map(([val, icon]) => (
-                <button key={val} onClick={() => setView(val)}
-                  style={{ padding: '8px 14px', borderRadius: '8px', border: `1.5px solid ${view === val ? '#1565C0' : 'rgba(21,101,192,0.2)'}`, background: view === val ? '#1565C0' : '#fff', color: view === val ? '#fff' : '#3B5280', fontWeight: 600, fontSize: '13px', cursor: 'pointer' }}>
-                  {icon} {val === 'table' ? 'Table' : 'Cards'}
-                </button>
-              ))}
+              {/* Table only on desktop */}
+              <button onClick={() => setView('table')}
+                className="desktop-only-btn"
+                style={{ padding: '8px 14px', borderRadius: '8px', border: `1.5px solid ${view === 'table' ? '#1565C0' : 'rgba(21,101,192,0.2)'}`, background: view === 'table' ? '#1565C0' : '#fff', color: view === 'table' ? '#fff' : '#3B5280', fontWeight: 600, fontSize: '13px', cursor: 'pointer' }}>
+                📋 Table
+              </button>
+              <button onClick={() => setView('cards')}
+                style={{ padding: '8px 14px', borderRadius: '8px', border: `1.5px solid ${view === 'cards' ? '#1565C0' : 'rgba(21,101,192,0.2)'}`, background: view === 'cards' ? '#1565C0' : '#fff', color: view === 'cards' ? '#fff' : '#3B5280', fontWeight: 600, fontSize: '13px', cursor: 'pointer' }}>
+                🃏 Cards
+              </button>
             </div>
           </div>
 
@@ -148,18 +153,7 @@ export default function Compare() {
                   </div>
                 </div>
 
-                {/* View toggle */}
-                <div>
-                  <label style={{ fontSize: '12px', color: '#7A90B8', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: '8px' }}>View</label>
-                  <div className="view-toggle" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                    {[['table','📋 Table'],['cards','🃏 Cards']].map(([val, label]) => (
-                      <button key={val} onClick={() => setView(val)}
-                        style={{ padding: '8px', borderRadius: '8px', border: `1.5px solid ${view === val ? '#1565C0' : 'rgba(21,101,192,0.15)'}`, background: view === val ? '#1565C0' : 'transparent', color: view === val ? '#fff' : '#3B5280', fontSize: '12px', fontWeight: 600, cursor: 'pointer', transition: 'all 0.15s' }}>
-                        {label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
+
 
                 {/* Reset */}
                 <button onClick={() => { setMinAmount(10000); setMaxRate(48); setMinCibil(0); setSort('rating'); }}
