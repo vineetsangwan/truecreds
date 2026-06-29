@@ -207,10 +207,37 @@ export default function BlogPost() {
         <motion.div className="h-full rounded-r-full" style={{ background: 'linear-gradient(90deg, #1565C0, #0288D1)', width: `${readProgress}%` }} />
       </div>
 
-      {/* HERO */}
-      <div style={{ background: 'linear-gradient(135deg, #1565C0 0%, #0288D1 60%, #0D47A1 100%)', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-        <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 relative">
+      {/* HERO — cover image as full background */}
+      <div style={{ position: 'relative', overflow: 'hidden', minHeight: '480px', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
+
+        {/* Background image or gradient fallback */}
+        {post.cover_image ? (
+          <img src={post.cover_image} alt={post.title}
+            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top', zIndex: 0 }} />
+        ) : (
+          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, #1565C0 0%, #0288D1 60%, #0D47A1 100%)', zIndex: 0 }}>
+            <div style={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
+          </div>
+        )}
+
+        {/* Dark gradient overlay — heavier at bottom where text sits */}
+        <div style={{ position: 'absolute', inset: 0, zIndex: 1,
+          background: post.cover_image
+            ? 'linear-gradient(to bottom, rgba(5,20,50,0.25) 0%, rgba(5,20,50,0.45) 40%, rgba(5,20,50,0.88) 75%, rgba(5,20,50,0.97) 100%)'
+            : 'linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.4) 100%)'
+        }} />
+
+        {/* Triangle clip at bottom — creates diagonal cut into content area */}
+        <div style={{ position: 'absolute', bottom: -2, left: 0, right: 0, zIndex: 2, lineHeight: 0 }}>
+          <svg viewBox="0 0 1440 80" preserveAspectRatio="none" style={{ width: '100%', height: '80px', display: 'block' }}>
+            <polygon points="0,80 1440,80 1440,0" fill="#ffffff" />
+          </svg>
+        </div>
+
+        {/* Content on top of image */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative" style={{ zIndex: 3, paddingBottom: '80px', paddingTop: '40px' }}>
+
+          {/* Breadcrumb */}
           <div className="flex items-center gap-2 text-xs mb-8" style={{ color: 'rgba(255,255,255,0.7)' }}>
             <Link to="/" className="no-underline hover:text-white transition-colors" style={{ color: 'rgba(255,255,255,0.7)' }}>Home</Link>
             <span>›</span>
@@ -218,34 +245,38 @@ export default function BlogPost() {
             <span>›</span>
             <span className="text-white truncate max-w-xs">{post.title}</span>
           </div>
+
           <div className="max-w-3xl">
+            {/* Meta */}
             <div className="flex flex-wrap items-center gap-3 mb-5">
-              <span className="px-3 py-1 rounded-full text-[10px] font-mono uppercase tracking-wider font-bold" style={{ background: 'rgba(255,255,255,0.2)', color: '#fff' }}>{post.category}</span>
-              <span className="text-xs font-mono" style={{ color: 'rgba(255,255,255,0.8)' }}>{post.read_time} read</span>
+              <span className="px-3 py-1 rounded-full text-[10px] font-mono uppercase tracking-wider font-bold"
+                style={{ background: 'rgba(255,255,255,0.2)', color: '#fff', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.2)' }}>
+                {post.category}
+              </span>
+              <span className="text-xs font-mono" style={{ color: 'rgba(255,255,255,0.85)' }}>{post.read_time} read</span>
               {post.published_at && (
-                <span className="text-xs" style={{ color: 'rgba(255,255,255,0.8)' }}>
+                <span className="text-xs" style={{ color: 'rgba(255,255,255,0.85)' }}>
                   {new Date(post.published_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}
                 </span>
               )}
             </div>
-            <h1 className="font-black leading-tight mb-5 text-white" style={{ fontFamily: 'Outfit,sans-serif', fontSize: 'clamp(1.8rem,4vw,2.8rem)', letterSpacing: '-0.02em' }}>
+
+            {/* Title */}
+            <h1 className="font-black leading-tight mb-5 text-white"
+              style={{ fontFamily: 'Outfit,sans-serif', fontSize: 'clamp(1.8rem,4vw,3rem)', letterSpacing: '-0.02em', textShadow: '0 2px 20px rgba(0,0,0,0.4)' }}>
               {post.title}
             </h1>
+
+            {/* Excerpt */}
             {post.excerpt && (
-              <p className="text-lg leading-relaxed mb-6" style={{ color: 'rgba(255,255,255,0.85)' }}>
+              <p className="text-lg leading-relaxed mb-6" style={{ color: 'rgba(255,255,255,0.9)', textShadow: '0 1px 8px rgba(0,0,0,0.3)' }}>
                 {post.excerpt.replace(/<[^>]+>/g, '')}
               </p>
             )}
+
             <ShareButtons title={post.title} />
           </div>
         </div>
-        {post.cover_image && (
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-0 relative">
-            <div className="rounded-t-2xl overflow-hidden" style={{ maxHeight: 400, border: '1px solid rgba(255,255,255,0.2)', borderBottom: 'none' }}>
-              <img src={post.cover_image} alt={post.title} className="w-full object-cover" style={{ maxHeight: 400 }} />
-            </div>
-          </div>
-        )}
       </div>
 
       {/* MAIN CONTENT — fixed sidebars, only article scrolls */}
