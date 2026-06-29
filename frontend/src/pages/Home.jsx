@@ -141,7 +141,7 @@ function EmiCalculator() {
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '32px', alignItems: 'center' }}>
       <div>
         {[
-          { label: 'Loan Amount', val: amount, set: setAmount, min: 10000, max: 2000000, step: 10000, fmt: v => v >= 100000 ? `₹${(v/100000).toFixed(v>=1000000?1:0)}${v>=1000000?'Cr':'L'}` : `₹${(v/1000).toFixed(0)}K` },
+          { label: 'Loan Amount', val: amount, set: setAmount, min: 10000, max: 20000000, step: 50000, fmt: v => v >= 10000000 ? `₹${(v/10000000).toFixed(1)}Cr` : v >= 100000 ? `₹${(v/100000).toFixed(1)}L` : `₹${(v/1000).toFixed(0)}K` },
           { label: 'Interest Rate (% p.a.)', val: rate, set: setRate, min: 9, max: 36, step: 0.5, fmt: v => `${v}%` },
           { label: 'Tenure (months)', val: tenure, set: setTenure, min: 3, max: 84, step: 1, fmt: v => `${v} mo` },
         ].map(s => (
@@ -343,6 +343,10 @@ export default function Home() {
         .loan-grid{grid-template-columns:repeat(3,1fr)!important}
         @media(max-width:900px){.loan-grid{grid-template-columns:repeat(2,1fr)!important}}
         @media(max-width:560px){.loan-grid{grid-template-columns:1fr!important}}
+        .faq-cta-grid{grid-template-columns:1fr 420px!important}
+        @media(max-width:860px){.faq-cta-grid{grid-template-columns:1fr!important}}
+        .partners-grid{grid-template-columns:repeat(5,1fr)!important}
+        @media(max-width:640px){.partners-grid{grid-template-columns:repeat(3,1fr)!important}}
         .ticker-inner{display:flex;animation:ticker 30s linear infinite;width:max-content}
         .ticker-inner:hover{animation-play-state:paused}
         .home-pad{padding-left:16px;padding-right:16px}
@@ -448,14 +452,15 @@ export default function Home() {
             </div>
             <Link to="/compare"><button className="btn-ghost" style={{ fontSize: '13px', padding: '8px 18px' }}>See full comparison →</button></Link>
           </div>
-          <div className='loan-grid' style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '16px', alignItems: 'stretch' }}>
+          <div className='loan-grid' style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '16px' }}>
             {loans.slice(0, 6).map((loan, i) => (
-              <div key={loan.id} style={{ display: 'flex' }}>
-                <LoanCard loan={loan} index={i} highlight={i === 0} />
+              <div key={loan.id} style={{ display: 'flex', alignItems: 'stretch' }}>
+                <div style={{ width: '100%' }}>
+                  <LoanCard loan={loan} index={i} highlight={i === 0} />
+                </div>
               </div>
             ))}
           </div>
-          <style>{`@media(max-width:900px){.loan-grid{grid-template-columns:repeat(2,1fr)!important}}@media(max-width:580px){.loan-grid{grid-template-columns:1fr!important}}`}</style>
         </div>
       </Section>
 
@@ -467,7 +472,7 @@ export default function Home() {
             <h2 style={{ fontFamily: 'Outfit,sans-serif', fontSize: 'clamp(1.6rem,4vw,2.8rem)', fontWeight: 700, color: '#0A1628' }}>Lenders we compare</h2>
             <p style={{ color: '#7A90B8', fontSize: '14px', marginTop: '8px' }}>All RBI-registered NBFCs and banks. Zero bias.</p>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(100px,1fr))', gap: '10px' }}>
+          <div className='partners-grid' style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', gap: '12px' }}>
             {LENDERS.map((l, i) => (
               <motion.div key={l.name} initial={{ opacity: 0, scale: 0.9 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ delay: i * 0.05 }}
                 whileHover={{ scale: 1.05 }}
@@ -742,51 +747,63 @@ export default function Home() {
         </div>
       </Section>
 
-      {/* ── FAQ ── */}
+      {/* ── FAQ + CTA SIDE BY SIDE ── */}
       <Section className="home-section" style={{ background: '#F0F6FF' }}>
-        <div style={{ maxWidth: '720px', margin: '0 auto', padding: '0 16px' }} className="home-pad">
-          <div style={{ textAlign: 'center', marginBottom: '36px' }}>
-            <div style={{ fontSize: '10px', fontFamily: 'monospace', textTransform: 'uppercase', letterSpacing: '0.25em', color: '#1565C0', marginBottom: '8px' }}>/ FAQ</div>
-            <h2 style={{ fontFamily: 'Outfit,sans-serif', fontSize: 'clamp(1.6rem,4vw,2.8rem)', fontWeight: 700, color: '#0A1628' }}>Common questions</h2>
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            {FAQS.map((f, i) => (
-              <motion.div key={i} className="card-cosmic" style={{ cursor: 'pointer', userSelect: 'none', overflow: 'hidden' }} onClick={() => setFaqOpen(faqOpen === i ? null : i)}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px' }}>
-                  <span style={{ fontWeight: 600, fontSize: '14px', color: '#0A1628' }}>{f.q}</span>
-                  <motion.span style={{ color: '#1565C0', flexShrink: 0 }} animate={{ rotate: faqOpen === i ? 180 : 0 }} transition={{ duration: 0.2 }}>▼</motion.span>
-                </div>
-                <motion.div initial={false} animate={{ height: faqOpen === i ? 'auto' : 0, opacity: faqOpen === i ? 1 : 0 }} transition={{ duration: 0.25 }} style={{ overflow: 'hidden' }}>
-                  <p style={{ fontSize: '14px', marginTop: '12px', lineHeight: 1.7, color: '#3B5280' }}>{f.a}</p>
-                </motion.div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </Section>
+        <div className="w-full max-w-7xl mx-auto home-pad">
+          <div className="faq-cta-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 420px', gap: '32px', alignItems: 'start' }}>
 
-      {/* ── CTA ── */}
-      <Section className="home-section">
-        <div style={{ maxWidth: '720px', margin: '0 auto', padding: '0 16px' }} className="home-pad">
-          <div style={{ borderRadius: '28px', padding: 'clamp(32px,6vw,64px) clamp(24px,5vw,48px)', position: 'relative', overflow: 'hidden', textAlign: 'center', background: 'linear-gradient(135deg,#1565C0,#0288D1)', boxShadow: '0 20px 60px rgba(21,101,192,0.3)' }}>
-            <div style={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(255,255,255,0.05) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.05) 1px,transparent 1px)', backgroundSize: '30px 30px', pointerEvents: 'none' }} />
-            <div style={{ position: 'absolute', right: '16px', top: '16px', width: '60px', height: '90px', opacity: 0.3 }}><IllustrationPhone /></div>
-            <div style={{ position: 'relative', zIndex: 10 }}>
-              <div style={{ fontSize: '10px', fontFamily: 'monospace', textTransform: 'uppercase', letterSpacing: '0.25em', color: 'rgba(255,255,255,0.7)', marginBottom: '16px' }}>/ GET STARTED NOW</div>
-              <h2 style={{ fontFamily: 'Outfit,sans-serif', fontSize: 'clamp(1.8rem,5vw,3rem)', fontWeight: 900, color: 'white', marginBottom: '16px', lineHeight: 1.2 }}>
-                Stop guessing.<br />Start comparing.
-              </h2>
-              <p style={{ color: 'rgba(255,255,255,0.85)', fontSize: 'clamp(14px,2vw,17px)', marginBottom: '28px', lineHeight: 1.6 }}>
-                Join 1.2 lakh+ Indians who found their best loan on TrueCreds.
-              </p>
-              <Link to="/apply">
-                <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}
-                  style={{ background: '#fff', color: '#1565C0', border: 'none', borderRadius: '14px', padding: 'clamp(12px,2vw,16px) clamp(24px,4vw,40px)', fontSize: 'clamp(14px,2vw,16px)', fontWeight: 700, cursor: 'pointer', boxShadow: '0 8px 24px rgba(0,0,0,0.2)', width: '100%', maxWidth: '360px' }}>
-                  Check Eligibility — Free & Instant →
-                </motion.button>
-              </Link>
-              <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '12px', marginTop: '14px' }}>TrueCreds is NOT a lender. Zero CIBIL impact. No spam.</p>
+            {/* LEFT — FAQ */}
+            <div>
+              <div style={{ fontSize: '10px', fontFamily: 'monospace', textTransform: 'uppercase', letterSpacing: '0.25em', color: '#1565C0', marginBottom: '8px' }}>/ FAQ</div>
+              <h2 style={{ fontFamily: 'Outfit,sans-serif', fontSize: 'clamp(1.6rem,4vw,2.4rem)', fontWeight: 700, color: '#0A1628', marginBottom: '24px' }}>Common questions</h2>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                {FAQS.map((f, i) => (
+                  <motion.div key={i} className="card-cosmic" style={{ cursor: 'pointer', userSelect: 'none', overflow: 'hidden', background: '#fff' }} onClick={() => setFaqOpen(faqOpen === i ? null : i)}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px' }}>
+                      <span style={{ fontWeight: 600, fontSize: '14px', color: '#0A1628' }}>{f.q}</span>
+                      <motion.span style={{ color: '#1565C0', flexShrink: 0 }} animate={{ rotate: faqOpen === i ? 180 : 0 }} transition={{ duration: 0.2 }}>▼</motion.span>
+                    </div>
+                    <motion.div initial={false} animate={{ height: faqOpen === i ? 'auto' : 0, opacity: faqOpen === i ? 1 : 0 }} transition={{ duration: 0.25 }} style={{ overflow: 'hidden' }}>
+                      <p style={{ fontSize: '14px', marginTop: '12px', lineHeight: 1.7, color: '#3B5280' }}>{f.a}</p>
+                    </motion.div>
+                  </motion.div>
+                ))}
+              </div>
             </div>
+
+            {/* RIGHT — CTA Blue Box */}
+            <div style={{ position: 'sticky', top: '80px' }}>
+              <div style={{ borderRadius: '24px', padding: '40px 32px', position: 'relative', overflow: 'hidden', textAlign: 'center', background: 'linear-gradient(135deg,#1565C0,#0288D1)', boxShadow: '0 20px 60px rgba(21,101,192,0.3)' }}>
+                <div style={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(255,255,255,0.05) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.05) 1px,transparent 1px)', backgroundSize: '30px 30px', pointerEvents: 'none' }} />
+                <div style={{ position: 'absolute', right: '12px', top: '12px', width: '50px', height: '75px', opacity: 0.25 }}><IllustrationPhone /></div>
+                <div style={{ position: 'relative', zIndex: 10 }}>
+                  <div style={{ fontSize: '32px', marginBottom: '12px' }}>🚀</div>
+                  <div style={{ fontSize: '10px', fontFamily: 'monospace', textTransform: 'uppercase', letterSpacing: '0.2em', color: 'rgba(255,255,255,0.7)', marginBottom: '12px' }}>/ GET STARTED NOW</div>
+                  <h2 style={{ fontFamily: 'Outfit,sans-serif', fontSize: 'clamp(1.6rem,3vw,2.2rem)', fontWeight: 900, color: 'white', marginBottom: '12px', lineHeight: 1.2 }}>
+                    Stop guessing.<br />Start comparing.
+                  </h2>
+                  <p style={{ color: 'rgba(255,255,255,0.85)', fontSize: '14px', marginBottom: '24px', lineHeight: 1.6 }}>
+                    Join 1.2 lakh+ Indians who found their best loan on TrueCreds.
+                  </p>
+                  <Link to="/apply">
+                    <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}
+                      style={{ background: '#fff', color: '#1565C0', border: 'none', borderRadius: '12px', padding: '14px 28px', fontSize: '14px', fontWeight: 700, cursor: 'pointer', boxShadow: '0 8px 24px rgba(0,0,0,0.2)', width: '100%' }}>
+                      Check Eligibility — Free →
+                    </motion.button>
+                  </Link>
+                  <div style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    {[['🔒','Zero CIBIL Impact'],['⚡','Result in 90 seconds'],['✅','100% Free to use']].map(([icon, text]) => (
+                      <div key={text} style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }}>
+                        <span style={{ fontSize: '14px' }}>{icon}</span>
+                        <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.8)' }}>{text}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', marginTop: '16px' }}>TrueCreds is NOT a lender. No spam.</p>
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
       </Section>
