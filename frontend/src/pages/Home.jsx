@@ -141,7 +141,7 @@ function EmiCalculator() {
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '32px', alignItems: 'center' }}>
       <div>
         {[
-          { label: 'Loan Amount', val: amount, set: setAmount, min: 10000, max: 20000000, step: 50000, fmt: v => v >= 10000000 ? `₹${(v/10000000).toFixed(1)}Cr` : v >= 100000 ? `₹${(v/100000).toFixed(1)}L` : `₹${(v/1000).toFixed(0)}K` },
+          { label: 'Loan Amount', val: amount, set: setAmount, min: 10000, max: 2000000, step: 10000, fmt: v => v >= 100000 ? `₹${(v/100000).toFixed(1)}L` : `₹${(v/1000).toFixed(0)}K` },
           { label: 'Interest Rate (% p.a.)', val: rate, set: setRate, min: 9, max: 36, step: 0.5, fmt: v => `${v}%` },
           { label: 'Tenure (months)', val: tenure, set: setTenure, min: 3, max: 84, step: 1, fmt: v => `${v} mo` },
         ].map(s => (
