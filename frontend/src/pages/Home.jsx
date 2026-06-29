@@ -196,6 +196,7 @@ function EmiCalculator() {
 
 /* ── Loan Amount Slider ── */
 function LoanSlider() {
+  const MAX = 2000000; // ₹20 Lakh max
   const [amount, setAmount] = useState(200000);
   const LENDER_DATA = [
     { name: 'mPokket', emoji: '🎓', min: 500, max: 30000 },
@@ -205,12 +206,18 @@ function LoanSlider() {
     { name: 'MoneyTap', emoji: '💧', min: 3000, max: 500000 },
     { name: 'PaySense', emoji: '💼', min: 5000, max: 500000 },
     { name: 'Navi', emoji: '🚀', min: 10000, max: 2000000 },
-    { name: 'Credila', emoji: '📚', min: 50000, max: 7500000 },
-    { name: 'Bajaj Finserv', emoji: '🏛️', min: 100000, max: 4000000 },
-    { name: 'FlexiLoans', emoji: '🧾', min: 100000, max: 5000000 },
+    { name: 'Bajaj Finserv', emoji: '🏛️', min: 100000, max: 2000000 },
+    { name: 'Credila', emoji: '📚', min: 50000, max: 2000000 },
+    { name: 'FlexiLoans', emoji: '🧾', min: 100000, max: 2000000 },
   ];
   const eligible = LENDER_DATA.filter(l => amount >= l.min && amount <= l.max);
-  const formatAmt = v => v >= 100000 ? `₹${(v / 100000).toFixed(v >= 1000000 ? 1 : 0)}${v >= 1000000 ? 'Cr' : 'L'}` : `₹${(v / 1000).toFixed(0)}K`;
+
+  // Format: ₹500 → ₹500, ₹10K → ₹10K, ₹1.5L → ₹1.5L, ₹20L max
+  const formatAmt = v => {
+    if (v >= 100000) return `₹${(v / 100000).toFixed(1)}L`;
+    if (v >= 1000) return `₹${(v / 1000).toFixed(0)}K`;
+    return `₹${v}`;
+  };
 
   return (
     <div>
@@ -219,12 +226,12 @@ function LoanSlider() {
           <span style={{ fontSize: '14px', color: '#3B5280', fontWeight: 500 }}>How much do you need?</span>
           <span style={{ fontSize: '28px', fontWeight: 900, color: '#1565C0', fontFamily: 'Outfit,sans-serif' }}>{formatAmt(amount)}</span>
         </div>
-        <input type="range" min={500} max={7500000} step={5000} value={amount}
+        <input type="range" min={500} max={MAX} step={500} value={amount}
           onChange={e => setAmount(Number(e.target.value))}
           style={{ width: '100%', accentColor: '#1565C0', height: '6px', cursor: 'pointer' }} />
         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px' }}>
           <span style={{ fontSize: '11px', color: '#94A3B8' }}>₹500</span>
-          <span style={{ fontSize: '11px', color: '#94A3B8' }}>₹75L</span>
+          <span style={{ fontSize: '11px', color: '#94A3B8' }}>₹20L</span>
         </div>
       </div>
       <div style={{ marginBottom: '12px', fontSize: '13px', color: '#3B5280' }}>
