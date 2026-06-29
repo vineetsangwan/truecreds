@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
-  <!-- Core Pages -->
+  <!-- ── CORE PAGES ── -->
   <url>
     <loc>https://truecreds.in/</loc>
     <changefreq>daily</changefreq>
@@ -33,7 +33,7 @@
     <priority>0.6</priority>
   </url>
 
-  <!-- Loan Type Pages -->
+  <!-- ── LOAN TYPE PAGES ── -->
   <url>
     <loc>https://truecreds.in/loans/personal</loc>
     <changefreq>weekly</changefreq>
@@ -65,7 +65,7 @@
     <priority>0.8</priority>
   </url>
 
-  <!-- City Pages -->
+  <!-- ── CITY PAGES ── -->
   <url>
     <loc>https://truecreds.in/loans-in/delhi</loc>
     <changefreq>weekly</changefreq>
@@ -87,9 +87,9 @@
     <priority>0.7</priority>
   </url>
 
-  <!-- Blog Posts -->
+  <!-- ── BLOG POSTS ── -->
   <url>
-    <loc>https://truecreds.in/blog/best-loan-apps-india-2026</loc>
+    <loc>https://truecreds.in/blog/best-instant-loan-apps-india-2026</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
@@ -113,13 +113,40 @@
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
+
+  <!-- ── COMPANY PAGES ── -->
   <url>
-    <loc>https://truecreds.in/blog/best-instant-loan-apps-india-2026</loc>
+    <loc>https://truecreds.in/about</loc>
     <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://truecreds.in/editorial-policy</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.4</priority>
+  </url>
+  <url>
+    <loc>https://truecreds.in/how-we-make-money</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.4</priority>
+  </url>
+  <url>
+    <loc>https://truecreds.in/corrections</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.3</priority>
   </url>
 
-  <!-- Legal Pages -->
+  <!-- ── LEGAL PAGES ── -->
+  <url>
+    <loc>https://truecreds.in/disclaimer</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://truecreds.in/terms</loc>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
   <url>
     <loc>https://truecreds.in/legal/privacy</loc>
     <changefreq>yearly</changefreq>
