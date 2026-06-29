@@ -704,23 +704,32 @@ export default function Home() {
               </div>
               <Link to="/blog"><button className="btn-ghost" style={{ fontSize: '13px', padding: '8px 18px' }}>All articles →</button></Link>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(280px,1fr))', gap: '16px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(280px,1fr))', gap: '16px', alignItems: 'stretch' }}>
               {blogs.map((b, i) => (
-                <motion.div key={b.slug} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}>
-                  <Link to={`/blog/${b.slug}`} style={{ textDecoration: 'none', display: 'block' }}>
-                    <div className="card-cosmic" style={{ height: '100%', overflow: 'hidden', padding: 0 }}>
-                      <div style={{ height: '140px', background: 'linear-gradient(135deg,#1565C0,#0288D1)', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', overflow: 'hidden' }}>
-                        {b.cover_image ? (
-                          <img src={b.cover_image} alt={b.title} style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.8 }} />
-                        ) : (
-                          <span style={{ fontSize: '40px', opacity: 0.4 }}>📰</span>
-                        )}
-                        <span style={{ position: 'absolute', top: '12px', left: '12px', padding: '4px 10px', borderRadius: '999px', fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', background: 'rgba(255,255,255,0.2)', color: 'white', backdropFilter: 'blur(4px)' }}>{b.category}</span>
+                <motion.div key={b.slug} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}
+                  style={{ display: 'flex' }}>
+                  <Link to={`/blog/${b.slug}`} style={{ textDecoration: 'none', display: 'flex', width: '100%' }}>
+                    <div className="card-cosmic" style={{ width: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden', padding: 0 }}>
+                      {/* Image — fixed height, always same */}
+                      <div style={{ height: '160px', flexShrink: 0, background: 'linear-gradient(135deg,#1565C0,#0288D1)', position: 'relative', overflow: 'hidden' }}>
+                        {b.cover_image
+                          ? <img src={b.cover_image} alt={b.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                          : (
+                            <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '8px' }}>
+                              <span style={{ fontSize: '36px', opacity: 0.5 }}>📰</span>
+                              <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.6)', fontFamily: 'monospace', textTransform: 'uppercase', letterSpacing: '0.1em' }}>TrueCreds</span>
+                            </div>
+                          )
+                        }
+                        <span style={{ position: 'absolute', top: '10px', left: '10px', padding: '3px 10px', borderRadius: '999px', fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', background: 'rgba(255,255,255,0.2)', color: 'white', backdropFilter: 'blur(6px)', border: '1px solid rgba(255,255,255,0.2)' }}>{b.category}</span>
                       </div>
-                      <div style={{ padding: '20px' }}>
-                        <h3 style={{ fontFamily: 'Outfit,sans-serif', fontWeight: 700, fontSize: '15px', color: '#0A1628', lineHeight: 1.4, marginBottom: '10px' }}>{b.title}</h3>
-                        {b.excerpt && <p style={{ fontSize: '13px', color: '#7A90B8', lineHeight: 1.6, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{b.excerpt}</p>}
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '14px', paddingTop: '14px', borderTop: '1px solid rgba(21,101,192,0.08)' }}>
+                      {/* Content — flex grows to fill */}
+                      <div style={{ padding: '18px 20px', display: 'flex', flexDirection: 'column', flex: 1 }}>
+                        <h3 style={{ fontFamily: 'Outfit,sans-serif', fontWeight: 700, fontSize: '15px', color: '#0A1628', lineHeight: 1.4, marginBottom: '8px' }}>{b.title}</h3>
+                        <p style={{ fontSize: '13px', color: '#7A90B8', lineHeight: 1.6, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', marginBottom: '0', flex: 1 }}>
+                          {b.excerpt || 'Read our latest insights on loans, rates and borrowing tips.'}
+                        </p>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '14px', paddingTop: '12px', borderTop: '1px solid rgba(21,101,192,0.08)' }}>
                           <span style={{ fontSize: '11px', color: '#94A3B8', fontFamily: 'JetBrains Mono,monospace' }}>{b.read_time} read</span>
                           <span style={{ fontSize: '12px', color: '#1565C0', fontWeight: 600 }}>Read more →</span>
                         </div>
@@ -734,7 +743,40 @@ export default function Home() {
         </Section>
       )}
 
-      {/* ── TESTIMONIALS ── */}
+
+      {/* ── WHY CHOOSE TRUECREDS ── */}
+      <Section className="home-section" style={{ background: '#fff' }}>
+        <div className="w-full max-w-7xl mx-auto home-pad">
+          <div style={{ textAlign: 'center', marginBottom: '48px' }}>
+            <div style={{ fontSize: '10px', fontFamily: 'monospace', textTransform: 'uppercase', letterSpacing: '0.25em', color: '#1565C0', marginBottom: '8px' }}>/ WHY TRUECREDS</div>
+            <h2 style={{ fontFamily: 'Outfit,sans-serif', fontSize: 'clamp(1.6rem,4vw,2.6rem)', fontWeight: 800, color: '#0A1628', marginBottom: '10px' }}>
+              Why Choose TrueCreds for Loan Comparison?
+            </h2>
+            <p style={{ color: '#7A90B8', fontSize: '15px' }}>Experience the smartest way to find and compare loans in India</p>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(240px,1fr))', gap: '24px' }}>
+            {[
+              { icon: '📊', bg: '#EFF6FF', iconBg: '#DBEAFE', color: '#1565C0', title: 'Smart Comparison', desc: 'Compare 12+ verified lenders in one place with transparent rates, fees and approval times.' },
+              { icon: '🆓', bg: '#F0FDF4', iconBg: '#DCFCE7', color: '#16a34a', title: '100% Free Service', desc: 'No hidden charges, no fees — completely free comparison platform for every borrower.' },
+              { icon: '🏦', bg: '#FFF7ED', iconBg: '#FED7AA', color: '#ea580c', title: 'Verified Lenders Only', desc: 'All lenders are RBI-registered and thoroughly verified. No unlicensed apps, ever.' },
+              { icon: '🧮', bg: '#FDF4FF', iconBg: '#F3E8FF', color: '#9333ea', title: 'Free Tools', desc: 'EMI calculator, eligibility checker and comparison tools — all free, no signup needed.' },
+              { icon: '⭐', bg: '#FFFBEB', iconBg: '#FEF3C7', color: '#d97706', title: 'Real User Reviews', desc: 'Verified ratings from 1.2 lakh+ borrowers who found their loans through TrueCreds.' },
+              { icon: '📱', bg: '#F0F6FF', iconBg: '#DBEAFE', color: '#1565C0', title: 'Mobile Optimised', desc: 'Seamlessly compare and apply from any device — phone, tablet or desktop.' },
+            ].map((f, i) => (
+              <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.08 }}
+                style={{ background: f.bg, borderRadius: '20px', padding: '28px 24px', textAlign: 'center', border: `1px solid ${f.iconBg}` }}>
+                <div style={{ width: '60px', height: '60px', borderRadius: '16px', background: f.iconBg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '26px', margin: '0 auto 16px' }}>
+                  {f.icon}
+                </div>
+                <h3 style={{ fontFamily: 'Outfit,sans-serif', fontWeight: 700, fontSize: '15px', color: '#0A1628', marginBottom: '8px' }}>{f.title}</h3>
+                <p style={{ fontSize: '13px', color: '#64748B', lineHeight: 1.7 }}>{f.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </Section>
+
+      {/* ── TESTIMONIALS ── */
       <Section className="home-section" style={{ background: '#fff', position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', right: '-15px', top: '30px', width: '120px', height: '120px' }}><IllustrationCoins /></div>
         <div className="w-full max-w-7xl mx-auto home-pad">
