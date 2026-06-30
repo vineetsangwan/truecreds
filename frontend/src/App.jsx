@@ -21,6 +21,11 @@ import Corrections from './pages/Corrections';
 import Disclaimer from './pages/Disclaimer';
 import TermsOfService from './pages/TermsOfService';
 import RejectionChecker from './pages/RejectionChecker';
+import EmiVsSip from './pages/EmiVsSip';
+import Glossary from './pages/Glossary';
+import SalaryEstimator from './pages/SalaryEstimator';
+import CibilRoadmap from './pages/CibilRoadmap';
+import RedFlags from './pages/RedFlags';
 import './index.css';
 import ScrollToTop from './components/ScrollToTop';
 
@@ -53,7 +58,12 @@ export default function App() {
         <Route path="/corrections" element={<Layout><Corrections /></Layout>} />
         <Route path="/disclaimer" element={<Layout><Disclaimer /></Layout>} />
         <Route path="/terms" element={<Layout><TermsOfService /></Layout>} />
-        <Route path="/rejection-checker" element={<Layout><RejectionChecker /></Layout>} />
+                <Route path="/rejection-checker" element={<Layout><RejectionChecker /></Layout>} />
+        <Route path="/emi-vs-sip" element={<Layout><EmiVsSip /></Layout>} />
+        <Route path="/glossary" element={<Layout><Glossary /></Layout>} />
+        <Route path="/salary-estimator" element={<Layout><SalaryEstimator /></Layout>} />
+        <Route path="/cibil-roadmap" element={<Layout><CibilRoadmap /></Layout>} />
+        <Route path="/red-flags" element={<Layout><RedFlags /></Layout>} />
       </Routes>
     </BrowserRouter>
   );
