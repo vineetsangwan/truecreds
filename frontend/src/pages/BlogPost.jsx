@@ -1,5 +1,5 @@
 import PageTransition from '../components/PageTransition';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { api } from '../lib/api';
@@ -56,6 +56,12 @@ export default function BlogPost() {
   const [related, setRelated] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // JS-driven sticky sidebar — works regardless of parent transforms (e.g. framer-motion PageTransition)
+  const articleColRef = useRef(null);
+  const sidebarSlotRef = useRef(null);
+  const sidebarBoxRef = useRef(null);
+  const [sidebarStyle, setSidebarStyle] = useState({ position: 'static' });
+
   useEffect(() => {
     window.scrollTo(0, 0);
     setLoading(true);
@@ -65,6 +71,51 @@ export default function BlogPost() {
       setRelated(posts.filter(p => p.slug !== slug).slice(0, 3));
     }).catch(() => {});
   }, [slug]);
+
+  // Manual sticky-until-content-ends logic — immune to parent transform/overflow issues
+  useEffect(() => {
+    const NAVBAR_OFFSET = 88;
+    const BOTTOM_GAP = 24;
+
+    const onScroll = () => {
+      const slot = sidebarSlotRef.current;
+      const box = sidebarBoxRef.current;
+      const articleCol = articleColRef.current;
+      if (!slot || !box || !articleCol) return;
+
+      // Desktop only — below 960px we let it flow naturally (CSS handles mobile stacking)
+      if (window.innerWidth < 960) {
+        setSidebarStyle({ position: 'static' });
+        return;
+      }
+
+      const slotRect = slot.getBoundingClientRect();
+      const articleRect = articleCol.getBoundingClientRect();
+      const boxHeight = box.offsetHeight;
+
+      const articleBottomInViewport = articleRect.bottom; // where article ends, relative to viewport
+
+      if (slotRect.top > NAVBAR_OFFSET) {
+        // Haven't scrolled to the sidebar yet — let it sit in normal flow
+        setSidebarStyle({ position: 'static', width: '100%' });
+      } else if (articleBottomInViewport > NAVBAR_OFFSET + boxHeight + BOTTOM_GAP) {
+        // Sidebar sticks to viewport top while article still has room below it.
+        // Use fixed + explicit left (viewport-relative) so it lines up with the slot column.
+        setSidebarStyle({ position: 'fixed', top: NAVBAR_OFFSET, left: slotRect.left, width: slotRect.width });
+      } else {
+        // Article is ending — release sidebar, pin it to bottom of article column instead (no whitespace gap)
+        setSidebarStyle({ position: 'absolute', bottom: 0, top: 'auto', left: 0, width: '100%' });
+      }
+    };
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+    onScroll();
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+    };
+  }, [post]);
 
   if (loading) {
     return (
@@ -99,20 +150,11 @@ export default function BlogPost() {
         .bp-content strong { color: #0A1628; font-weight: 700; }
         .bp-content blockquote { border-left: 3px solid #1565C0; background: #F0F6FF; padding: 16px 20px; margin: 24px 0; border-radius: 0 12px 12px 0; font-style: italic; color: #1E293B; }
         .bp-content a { color: #1565C0; text-decoration: underline; }
-        /* KEY FIX: .bp-layout itself has NO align-items:start.
-           Instead the article column is the ONLY thing that scrolls naturally (normal page flow).
-           The sidebar uses position:sticky with top+bottom, which makes it stick while its own
-           parent container (matching article height exactly) is in view, then release exactly
-           when the article ends — zero extra whitespace, no internal scrollbar on the form. */
-        .bp-layout { display: grid; grid-template-columns: 1fr 380px; gap: 32px; }
-        .bp-sidebar {
-          position: sticky;
-          top: 88px;
-          align-self: start;
-        }
+        .bp-layout { display: grid; grid-template-columns: 1fr 380px; gap: 32px; align-items: start; }
+        .bp-article-col { position: relative; }
+        .bp-sidebar-slot { position: relative; }
         @media(max-width: 960px) {
           .bp-layout { grid-template-columns: 1fr; }
-          .bp-sidebar { position: static; }
         }
         @media(max-width: 640px) {
           .bp-content { font-size: 15px; }
@@ -165,8 +207,8 @@ export default function BlogPost() {
         <div style={{ maxWidth: '1180px', margin: '0 auto', padding: '0 20px' }}>
           <div className="bp-layout">
 
-            {/* LEFT — Article (this column's natural height bounds the sticky sidebar) */}
-            <div className="bp-article-col">
+            {/* LEFT — Article (its height bounds how far the sidebar can stick) */}
+            <div className="bp-article-col" ref={articleColRef}>
               {/* Cover image */}
               {post.cover_image && (
                 <div style={{ marginBottom: '24px', borderRadius: '16px', overflow: 'hidden' }}>
@@ -209,9 +251,9 @@ export default function BlogPost() {
               </div>
             </div>
 
-            {/* RIGHT — Sticky, viewport-bounded. Scrolls internally only if form is taller than screen. */}
-            <div className="bp-sidebar">
-              <div style={{ background: '#fff', borderRadius: '16px', padding: '24px', border: '1px solid rgba(21,101,192,0.1)', boxShadow: '0 4px 24px rgba(21,101,192,0.08)' }}>
+            {/* RIGHT — slot reserves grid space; box is JS-positioned (fixed while scrolling, absolute when article ends) */}
+            <div className="bp-sidebar-slot" ref={sidebarSlotRef} style={{ minHeight: '1px' }}>
+              <div ref={sidebarBoxRef} style={{ ...sidebarStyle, background: '#fff', borderRadius: '16px', padding: '24px', border: '1px solid rgba(21,101,192,0.1)', boxShadow: '0 4px 24px rgba(21,101,192,0.08)', boxSizing: 'border-box' }}>
                 <h2 style={{ fontFamily: 'Outfit,sans-serif', fontWeight: 800, fontSize: '20px', color: '#0A1628', marginBottom: '6px' }}>Compare Loan Offers</h2>
                 <p style={{ fontSize: '13px', color: '#7A90B8', marginBottom: '20px' }}>Get matched with top lenders in 2 minutes</p>
                 <EligibilityForm compact />
