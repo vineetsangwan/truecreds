@@ -262,6 +262,23 @@ export default function BlogPost() {
           .bp-content { font-size: 15px; }
           .bp-content h2 { font-size: 1.3rem; }
           .bp-content h3 { font-size: 1.1rem; }
+
+          /* Article card → full width, edge-to-edge, no card chrome on mobile */
+          .bp-article-card {
+            background: transparent !important;
+            border: none !important;
+            border-radius: 0 !important;
+            box-shadow: none !important;
+            padding: 0 !important;
+            margin-left: -20px !important;
+            margin-right: -20px !important;
+            width: calc(100% + 40px) !important;
+          }
+          .bp-article-card > .bp-content,
+          .bp-article-card > div:last-child {
+            padding-left: 20px !important;
+            padding-right: 20px !important;
+          }
         }
       `}</style>
 
@@ -318,8 +335,8 @@ export default function BlogPost() {
                 </div>
               )}
 
-              {/* Article body card */}
-              <div style={{ background: '#fff', borderRadius: '16px', padding: 'clamp(20px,4vw,40px)', border: '1px solid rgba(21,101,192,0.1)', marginBottom: '20px' }}>
+              {/* Article body card — becomes full-width, borderless on mobile */}
+              <div className="bp-article-card" style={{ background: '#fff', borderRadius: '16px', padding: 'clamp(20px,4vw,40px)', border: '1px solid rgba(21,101,192,0.1)', marginBottom: '20px' }}>
                 <div className="bp-content" dangerouslySetInnerHTML={{ __html: contentHtml }} />
                 <div style={{ marginTop: '28px', paddingTop: '20px', borderTop: '1px solid rgba(21,101,192,0.1)' }}>
                   <ShareButtons title={post.title} />
