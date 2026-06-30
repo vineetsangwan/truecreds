@@ -216,17 +216,19 @@ export default function BlogPost() {
         .bp-content a { color: #1565C0; text-decoration: underline; }
 
         /* Tables — horizontal scroll on mobile, with a visible scroll hint so users know to swipe */
-        /* Table wrapper — pure horizontal scroll container, full edge-to-edge on mobile */
+        /* Table wrapper — starts at full container width; only scrolls if the table content
+           genuinely exceeds that width. Nothing is artificially stretched or shrunk. */
         .bp-table-wrap {
-          overflow-x: scroll;
+          width: 100%;
+          overflow-x: auto;
           -webkit-overflow-scrolling: touch;
           margin: 20px 0;
           border-radius: 12px;
           border: 1px solid rgba(21,101,192,0.12);
         }
         .bp-table {
-          width: max-content;
-          min-width: 100%;
+          width: 100%;          /* fills the wrapper exactly when content fits */
+          table-layout: auto;   /* columns size to their content, not forced */
           border-collapse: collapse;
           font-size: 14px;
         }
@@ -249,11 +251,12 @@ export default function BlogPost() {
         .bp-table tr:last-child td { border-bottom: none; }
         .bp-table tr:nth-child(even) td { background: #F8FAFF; }
 
-        /* Mobile: edge-to-edge full-bleed scroll, visible scrollbar so users SEE it's scrollable */
+        /* Mobile: full edge-to-edge width. Scroll only kicks in for the part that overflows screen. */
         @media(max-width: 640px) {
           .bp-table-wrap {
             margin-left: -20px;
             margin-right: -20px;
+            width: calc(100% + 40px);
             border-radius: 0;
             border-left: none;
             border-right: none;
@@ -262,7 +265,7 @@ export default function BlogPost() {
           }
           .bp-table { font-size: 13px; }
           .bp-table th, .bp-table td { padding: 10px 14px; }
-          /* Visible scrollbar on mobile so the table doesn't look "broken" — it clearly shows more content exists */
+          /* Visible scrollbar — only appears/matters once content actually overflows */
           .bp-table-wrap::-webkit-scrollbar { height: 6px; }
           .bp-table-wrap::-webkit-scrollbar-track { background: rgba(21,101,192,0.06); border-radius: 10px; }
           .bp-table-wrap::-webkit-scrollbar-thumb { background: rgba(21,101,192,0.35); border-radius: 10px; }
