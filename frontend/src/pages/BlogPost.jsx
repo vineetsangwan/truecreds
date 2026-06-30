@@ -249,14 +249,14 @@ export default function BlogPost() {
         @media(max-width: 640px) {
           .bp-table-hint { display: flex; }
         }
-        .bp-layout { display: grid; grid-template-columns: 1fr 380px; gap: 32px; align-items: start; }
-        .bp-article-col { position: relative; }
-        .bp-sidebar-slot { position: relative; }
+        .bp-layout { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 32px; align-items: start; }
+        .bp-article-col { position: relative; min-width: 0; overflow-x: hidden; }
+        .bp-sidebar-slot { position: relative; min-width: 0; }
         .bp-sidebar-slot div::-webkit-scrollbar { width: 5px; }
         .bp-sidebar-slot div::-webkit-scrollbar-thumb { background: rgba(21,101,192,0.2); border-radius: 10px; }
         .bp-sidebar-slot div::-webkit-scrollbar-track { background: transparent; }
         @media(max-width: 960px) {
-          .bp-layout { grid-template-columns: 1fr; }
+          .bp-layout { grid-template-columns: minmax(0, 1fr); }
         }
         @media(max-width: 640px) {
           .bp-content { font-size: 15px; }
@@ -305,8 +305,8 @@ export default function BlogPost() {
       </div>
 
       {/* ── Main 2-column layout: Article + Sticky Form ── */}
-      <div style={{ background: '#F8FAFF', padding: '32px 0 0' }}>
-        <div style={{ maxWidth: '1180px', margin: '0 auto', padding: '0 20px' }}>
+      <div style={{ background: '#F8FAFF', padding: '32px 0 0', overflowX: 'hidden' }}>
+        <div style={{ maxWidth: '1180px', margin: '0 auto', padding: '0 20px', overflowX: 'hidden' }}>
           <div className="bp-layout">
 
             {/* LEFT — Article (its height bounds how far the sidebar can stick) */}
