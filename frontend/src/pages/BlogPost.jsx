@@ -227,8 +227,12 @@ export default function BlogPost() {
           border: 1px solid rgba(21,101,192,0.12);
         }
         .bp-table {
-          width: 100%;          /* fills the wrapper exactly when content fits */
-          table-layout: auto;   /* columns size to their content, not forced */
+          /* Table always takes its natural content width — if that's less than the wrapper,
+             the wrapper background still fills the row (header gradient etc.) via the wrap below.
+             If content is wider than wrapper, this is what makes the scroll kick in correctly. */
+          width: max-content;
+          min-width: 100%;
+          table-layout: auto;
           border-collapse: collapse;
           font-size: 14px;
         }
