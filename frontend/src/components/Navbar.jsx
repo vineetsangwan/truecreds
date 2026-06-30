@@ -148,11 +148,13 @@ export default function Navbar() {
                   Check Eligibility →
                 </motion.button>
               </Link>
-              <button className="md:hidden flex flex-col justify-center gap-[5px] w-8 h-8 p-1" onClick={() => setMobileOpen(!mobileOpen)}>
-                <motion.span animate={{ rotate: mobileOpen ? 45 : 0, y: mobileOpen ? 7 : 0 }} className="block w-full h-0.5 rounded origin-center" style={{ background: '#1565C0' }} />
-                <motion.span animate={{ opacity: mobileOpen ? 0 : 1 }} className="block w-full h-0.5 rounded" style={{ background: '#1565C0' }} />
-                <motion.span animate={{ rotate: mobileOpen ? -45 : 0, y: mobileOpen ? -7 : 0 }} className="block w-full h-0.5 rounded origin-center" style={{ background: '#1565C0' }} />
-              </button>
+              {!mobileOpen && (
+                <button className="md:hidden flex flex-col justify-center gap-[5px] w-8 h-8 p-1" onClick={() => setMobileOpen(true)}>
+                  <span className="block w-full h-0.5 rounded" style={{ background: '#1565C0' }} />
+                  <span className="block w-full h-0.5 rounded" style={{ background: '#1565C0' }} />
+                  <span className="block w-full h-0.5 rounded" style={{ background: '#1565C0' }} />
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -170,16 +172,15 @@ export default function Navbar() {
               className="fixed right-0 top-0 bottom-0 z-50 w-80 md:hidden flex flex-col"
               style={{ background: '#fff', borderLeft: '1px solid rgba(21,101,192,0.12)', boxShadow: '-20px 0 60px rgba(21,101,192,0.1)', overflow: 'hidden', position: 'relative' }}>
 
-              {/* Background illustration */}
-              <svg viewBox="0 0 300 700" style={{ position: 'absolute', top: 0, right: 0, width: '100%', height: '100%', opacity: 0.035, pointerEvents: 'none', zIndex: 0 }}>
-                <circle cx="260" cy="100" r="90" fill="#1565C0" />
-                <circle cx="280" cy="280" r="60" fill="#0288D1" />
-                <rect x="20" y="450" width="20" height="60" fill="#1565C0" />
-                <rect x="50" y="420" width="20" height="90" fill="#0288D1" />
-                <rect x="80" y="390" width="20" height="120" fill="#1565C0" />
-                <circle cx="60" cy="620" r="50" fill="#0288D1" />
-              </svg>
-              <div style={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(21,101,192,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(21,101,192,0.02) 1px,transparent 1px)', backgroundSize: '24px 24px', pointerEvents: 'none' }} />
+              {/* Background illustration — very subtle, bottom corner only */}
+              <div style={{ position: 'absolute', bottom: 0, right: 0, width: '140px', height: '140px', opacity: 0.04, pointerEvents: 'none', overflow: 'hidden' }}>
+                <svg viewBox="0 0 140 140" style={{ width: '100%', height: '100%' }}>
+                  <rect x="20" y="90" width="16" height="40" fill="#1565C0" />
+                  <rect x="45" y="70" width="16" height="60" fill="#0288D1" />
+                  <rect x="70" y="50" width="16" height="80" fill="#1565C0" />
+                  <rect x="95" y="75" width="16" height="55" fill="#0288D1" />
+                </svg>
+              </div>
 
               <div className="h-[2px]" style={{ background: 'linear-gradient(90deg, #1565C0, #0288D1)', position: 'relative', zIndex: 1 }} />
               <div className="flex items-center justify-between p-5 border-b" style={{ borderColor: 'rgba(21,101,192,0.1)', position: 'relative', zIndex: 1 }}>
