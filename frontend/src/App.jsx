@@ -20,6 +20,7 @@ import HowWeMakeMoney from './pages/HowWeMakeMoney';
 import Corrections from './pages/Corrections';
 import Disclaimer from './pages/Disclaimer';
 import TermsOfService from './pages/TermsOfService';
+import RejectionChecker from './pages/RejectionChecker';
 import './index.css';
 import ScrollToTop from './components/ScrollToTop';
 
@@ -52,6 +53,7 @@ export default function App() {
         <Route path="/corrections" element={<Layout><Corrections /></Layout>} />
         <Route path="/disclaimer" element={<Layout><Disclaimer /></Layout>} />
         <Route path="/terms" element={<Layout><TermsOfService /></Layout>} />
+        <Route path="/rejection-checker" element={<Layout><RejectionChecker /></Layout>} />
       </Routes>
     </BrowserRouter>
   );
