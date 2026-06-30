@@ -165,12 +165,23 @@ export default function Navbar() {
         {mobileOpen && (
           <>
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              className="fixed inset-0 z-40 md:hidden" style={{ background: 'rgba(10,22,40,0.3)', backdropFilter: 'blur(4px)' }}
+              className="md:hidden"
+              style={{ position: 'fixed', inset: 0, zIndex: 40, background: 'rgba(10,22,40,0.3)', backdropFilter: 'blur(4px)' }}
               onClick={() => setMobileOpen(false)} />
-            <motion.div initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}
+            <motion.div
+              className="md:hidden"
+              initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}
               transition={{ type: 'spring', damping: 28, stiffness: 300 }}
-              className="fixed right-0 top-0 bottom-0 z-50 w-80 md:hidden flex flex-col"
-              style={{ background: '#fff', borderLeft: '1px solid rgba(21,101,192,0.12)', boxShadow: '-20px 0 60px rgba(21,101,192,0.1)', overflow: 'hidden', position: 'relative' }}>
+              style={{
+                position: 'fixed', top: 0, right: 0, bottom: 0,
+                width: '320px', maxWidth: '85vw',
+                zIndex: 50,
+                background: '#fff',
+                borderLeft: '1px solid rgba(21,101,192,0.12)',
+                boxShadow: '-20px 0 60px rgba(21,101,192,0.15)',
+                display: 'flex', flexDirection: 'column',
+                overflow: 'hidden',
+              }}>
 
               {/* Background illustration — very subtle, bottom corner only */}
               <div style={{ position: 'absolute', bottom: 0, right: 0, width: '140px', height: '140px', opacity: 0.04, pointerEvents: 'none', overflow: 'hidden' }}>
@@ -182,18 +193,22 @@ export default function Navbar() {
                 </svg>
               </div>
 
-              <div className="h-[2px]" style={{ background: 'linear-gradient(90deg, #1565C0, #0288D1)', position: 'relative', zIndex: 1 }} />
-              <div className="flex items-center justify-between p-5 border-b" style={{ borderColor: 'rgba(21,101,192,0.1)', position: 'relative', zIndex: 1 }}>
-                <span className="font-black text-lg" style={{ fontFamily: 'Outfit,sans-serif', color: '#0A1628' }}>True<span style={{ color: '#1565C0' }}>Creds</span></span>
-                <button onClick={() => setMobileOpen(false)} style={{ color: '#7A90B8' }}>✕</button>
+              <div style={{ height: '2px', background: 'linear-gradient(90deg, #1565C0, #0288D1)', flexShrink: 0 }} />
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px', borderBottom: '1px solid rgba(21,101,192,0.1)', flexShrink: 0, position: 'relative', zIndex: 1 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ fontSize: '22px' }}>✅</span>
+                  <span style={{ fontFamily: 'Outfit,sans-serif', fontWeight: 900, fontSize: '18px', color: '#0A1628' }}>
+                    True<span style={{ color: '#1565C0' }}>Creds</span>
+                  </span>
+                </div>
+                <button onClick={() => setMobileOpen(false)} style={{ color: '#7A90B8', background: 'none', border: 'none', fontSize: '20px', cursor: 'pointer', padding: '4px', lineHeight: 1 }}>✕</button>
               </div>
 
-              <nav className="flex-1 p-5 space-y-1 overflow-y-auto" style={{ position: 'relative', zIndex: 1 }}>
+              <nav style={{ flex: 1, padding: '20px', overflowY: 'auto', position: 'relative', zIndex: 1 }}>
                 {LINKS.map((link) => link.dropdown ? (
                   <div key={link.label} style={{ marginBottom: '4px' }}>
                     <button onClick={() => toggleMobileSection(link.label)}
-                      className="w-full flex items-center justify-between text-xs uppercase tracking-wider px-3 py-2.5 font-mono font-semibold rounded-lg"
-                      style={{ color: '#1565C0', background: mobileExpanded[link.label] ? 'rgba(21,101,192,0.06)' : 'transparent' }}>
+                      style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.08em', padding: '10px 12px', fontFamily: 'monospace', fontWeight: 600, borderRadius: '10px', border: 'none', cursor: 'pointer', color: '#1565C0', background: mobileExpanded[link.label] ? 'rgba(21,101,192,0.06)' : 'transparent' }}>
                       {link.label}
                       <motion.span animate={{ rotate: mobileExpanded[link.label] ? 180 : 0 }} transition={{ duration: 0.2 }}>▾</motion.span>
                     </button>
@@ -201,8 +216,8 @@ export default function Navbar() {
                       {mobileExpanded[link.label] && (
                         <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} style={{ overflow: 'hidden' }}>
                           {link.dropdown.map(item => (
-                            <Link key={item.to} to={item.to} className="block px-3 py-2 text-sm rounded-lg no-underline transition-colors pl-6"
-                              style={{ color: loc.pathname === item.to ? '#1565C0' : '#3B5280', background: loc.pathname === item.to ? 'rgba(21,101,192,0.06)' : 'transparent', fontWeight: loc.pathname === item.to ? 600 : 400 }}>
+                            <Link key={item.to} to={item.to}
+                              style={{ display: 'block', padding: '8px 12px 8px 24px', fontSize: '14px', borderRadius: '10px', textDecoration: 'none', color: loc.pathname === item.to ? '#1565C0' : '#3B5280', background: loc.pathname === item.to ? 'rgba(21,101,192,0.06)' : 'transparent', fontWeight: loc.pathname === item.to ? 600 : 400 }}>
                               {item.label}
                             </Link>
                           ))}
@@ -211,21 +226,23 @@ export default function Navbar() {
                     </AnimatePresence>
                   </div>
                 ) : (
-                  <Link key={link.to} to={link.to} className="block px-3 py-2.5 text-sm font-medium rounded-lg no-underline transition-all"
-                    style={{ color: loc.pathname === link.to ? '#1565C0' : '#3B5280', background: loc.pathname === link.to ? 'rgba(21,101,192,0.08)' : 'transparent' }}>
+                  <Link key={link.to} to={link.to}
+                    style={{ display: 'block', padding: '10px 12px', fontSize: '14px', fontWeight: 500, borderRadius: '10px', textDecoration: 'none', marginBottom: '4px', color: loc.pathname === link.to ? '#1565C0' : '#3B5280', background: loc.pathname === link.to ? 'rgba(21,101,192,0.08)' : 'transparent' }}>
                     {link.label}
                   </Link>
                 ))}
               </nav>
 
-              <div className="p-5 border-t" style={{ borderColor: 'rgba(21,101,192,0.1)', position: 'relative', zIndex: 1, background: '#fff' }}>
-                <Link to="/apply" className="btn-mint w-full justify-center text-sm">Check Eligibility — Free</Link>
+              <div style={{ padding: '20px', borderTop: '1px solid rgba(21,101,192,0.1)', position: 'relative', zIndex: 1, background: '#fff', flexShrink: 0 }}>
+                <Link to="/apply" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', padding: '13px', borderRadius: '12px', background: 'linear-gradient(135deg,#1565C0,#0288D1)', color: '#fff', fontWeight: 700, fontSize: '14px', textDecoration: 'none', boxShadow: '0 4px 16px rgba(21,101,192,0.3)' }}>
+                  Check Eligibility — Free
+                </Link>
               </div>
             </motion.div>
           </>
         )}
       </AnimatePresence>
-      <div className="h-16" />
+      <div style={{ height: '64px' }} />
     </>
   );
 }
