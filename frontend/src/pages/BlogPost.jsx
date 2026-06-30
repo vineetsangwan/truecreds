@@ -36,7 +36,7 @@ function parseTable(block) {
   // Second row is the separator (---|---) — skip it
   const headerCells = cells[0];
   const bodyRows = cells.slice(2);
-  let html = '<div class="bp-table-wrap"><table class="bp-table"><thead><tr>';
+  let html = '<div class="bp-table-hint">👆 Swipe to see more →</div><div class="bp-table-wrap"><table class="bp-table"><thead><tr>';
   headerCells.forEach(h => { html += `<th>${h}</th>`; });
   html += '</tr></thead><tbody>';
   bodyRows.forEach(row => {
@@ -215,16 +215,39 @@ export default function BlogPost() {
         .bp-content blockquote { border-left: 3px solid #1565C0; background: #F0F6FF; padding: 16px 20px; margin: 24px 0; border-radius: 0 12px 12px 0; font-style: italic; color: #1E293B; }
         .bp-content a { color: #1565C0; text-decoration: underline; }
 
-        /* Tables — horizontal scroll on mobile so they never break layout */
-        .bp-table-wrap { overflow-x: auto; margin: 20px 0; border-radius: 12px; border: 1px solid rgba(21,101,192,0.12); -webkit-overflow-scrolling: touch; }
-        .bp-table { width: 100%; border-collapse: collapse; min-width: 480px; font-size: 14px; }
-        .bp-table th { background: linear-gradient(135deg,#1565C0,#0288D1); color: #fff; text-align: left; padding: 12px 16px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; }
-        .bp-table td { padding: 12px 16px; border-bottom: 1px solid rgba(21,101,192,0.08); color: #334155; white-space: nowrap; }
+        /* Tables — horizontal scroll on mobile, with a visible scroll hint so users know to swipe */
+        .bp-table-wrap {
+          position: relative;
+          overflow-x: auto;
+          margin: 20px 0;
+          border-radius: 12px;
+          border: 1px solid rgba(21,101,192,0.12);
+          -webkit-overflow-scrolling: touch;
+          /* Fade-out edge on the right hints there's more content to scroll to */
+          -webkit-mask-image: linear-gradient(to right, black 0%, black 96%, transparent 100%);
+          mask-image: linear-gradient(to right, black 0%, black 96%, transparent 100%);
+        }
+        .bp-table { width: 100%; border-collapse: collapse; min-width: 420px; font-size: 14px; }
+        .bp-table th { background: linear-gradient(135deg,#1565C0,#0288D1); color: #fff; text-align: left; padding: 12px 14px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; white-space: nowrap; }
+        .bp-table td { padding: 12px 14px; border-bottom: 1px solid rgba(21,101,192,0.08); color: #334155; white-space: nowrap; }
         .bp-table tr:last-child td { border-bottom: none; }
         .bp-table tr:nth-child(even) td { background: #F8FAFF; }
+        /* Sticky first column on mobile — lender name stays visible while scrolling right */
         @media(max-width: 640px) {
-          .bp-table { font-size: 13px; }
-          .bp-table th, .bp-table td { padding: 10px 12px; }
+          .bp-table { font-size: 12.5px; min-width: 360px; }
+          .bp-table th, .bp-table td { padding: 9px 10px; }
+          .bp-table th:first-child, .bp-table td:first-child {
+            position: sticky; left: 0; z-index: 1;
+            box-shadow: 2px 0 4px rgba(0,0,0,0.04);
+          }
+          .bp-table td:first-child { background: #fff; font-weight: 600; }
+          .bp-table tr:nth-child(even) td:first-child { background: #F8FAFF; }
+          .bp-table th:first-child { background: #1565C0; }
+        }
+        /* Small swipe hint shown only on mobile, above the table */
+        .bp-table-hint { display: none; font-size: 11px; color: #94A3B8; margin-bottom: 6px; align-items: center; gap: 4px; }
+        @media(max-width: 640px) {
+          .bp-table-hint { display: flex; }
         }
         .bp-layout { display: grid; grid-template-columns: 1fr 380px; gap: 32px; align-items: start; }
         .bp-article-col { position: relative; }
