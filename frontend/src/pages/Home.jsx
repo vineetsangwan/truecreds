@@ -469,7 +469,7 @@ export default function Home() {
             </div>
             <Link to="/compare"><button className="btn-ghost" style={{ fontSize: '13px', padding: '8px 18px' }}>See full comparison →</button></Link>
           </div>
-          <div className='loan-grid' style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '14px', gridAutoRows: '1fr' }}>
+          <div className='loan-grid' style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '14px', gridAutoRows: '1fr', marginTop: '14px' }}>
             {loans.slice(0, 6).map((loan, i) => (
               <LoanCard key={loan.id} loan={loan} index={i} highlight={i === 0} />
             ))}
