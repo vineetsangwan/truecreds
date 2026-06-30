@@ -28,9 +28,49 @@ function ShareButtons({ title }) {
   );
 }
 
+function parseTable(block) {
+  // block = array of lines like: | A | B |  /  |---|---|  /  | 1 | 2 |
+  const rows = block.filter(l => l.trim().startsWith('|'));
+  if (rows.length < 2) return null;
+  const cells = rows.map(r => r.trim().replace(/^\|/, '').replace(/\|$/, '').split('|').map(c => c.trim()));
+  // Second row is the separator (---|---) — skip it
+  const headerCells = cells[0];
+  const bodyRows = cells.slice(2);
+  let html = '<div class="bp-table-wrap"><table class="bp-table"><thead><tr>';
+  headerCells.forEach(h => { html += `<th>${h}</th>`; });
+  html += '</tr></thead><tbody>';
+  bodyRows.forEach(row => {
+    html += '<tr>';
+    row.forEach(c => { html += `<td>${c}</td>`; });
+    html += '</tr>';
+  });
+  html += '</tbody></table></div>';
+  return html;
+}
+
 function markdownToHtml(md) {
   if (!md) return '';
-  let html = md;
+
+  // ── Extract and convert tables FIRST (before paragraph wrapping mangles them) ──
+  const lines = md.split('\n');
+  const outLines = [];
+  let i = 0;
+  while (i < lines.length) {
+    if (lines[i].trim().startsWith('|')) {
+      const tableBlock = [];
+      while (i < lines.length && lines[i].trim().startsWith('|')) {
+        tableBlock.push(lines[i]);
+        i++;
+      }
+      const tableHtml = parseTable(tableBlock);
+      outLines.push(tableHtml || tableBlock.join('\n'));
+    } else {
+      outLines.push(lines[i]);
+      i++;
+    }
+  }
+  let html = outLines.join('\n');
+
   html = html.replace(/^### (.*$)/gim, '<h3>$1</h3>');
   html = html.replace(/^## (.*$)/gim, '<h2>$1</h2>');
   html = html.replace(/^# (.*$)/gim, '<h1>$1</h1>');
@@ -47,6 +87,7 @@ function markdownToHtml(md) {
   html = html.replace(/<p><ul>/g, '<ul>').replace(/<\/ul><\/p>/g, '</ul>');
   html = html.replace(/<p><ol>/g, '<ol>').replace(/<\/ol><\/p>/g, '</ol>');
   html = html.replace(/<p><blockquote>/g, '<blockquote>').replace(/<\/blockquote><\/p>/g, '</blockquote>');
+  html = html.replace(/<p><div class="bp-table-wrap">/g, '<div class="bp-table-wrap">').replace(/<\/div><\/p>/g, '</div>');
   return html;
 }
 
@@ -173,9 +214,24 @@ export default function BlogPost() {
         .bp-content strong { color: #0A1628; font-weight: 700; }
         .bp-content blockquote { border-left: 3px solid #1565C0; background: #F0F6FF; padding: 16px 20px; margin: 24px 0; border-radius: 0 12px 12px 0; font-style: italic; color: #1E293B; }
         .bp-content a { color: #1565C0; text-decoration: underline; }
+
+        /* Tables — horizontal scroll on mobile so they never break layout */
+        .bp-table-wrap { overflow-x: auto; margin: 20px 0; border-radius: 12px; border: 1px solid rgba(21,101,192,0.12); -webkit-overflow-scrolling: touch; }
+        .bp-table { width: 100%; border-collapse: collapse; min-width: 480px; font-size: 14px; }
+        .bp-table th { background: linear-gradient(135deg,#1565C0,#0288D1); color: #fff; text-align: left; padding: 12px 16px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; }
+        .bp-table td { padding: 12px 16px; border-bottom: 1px solid rgba(21,101,192,0.08); color: #334155; white-space: nowrap; }
+        .bp-table tr:last-child td { border-bottom: none; }
+        .bp-table tr:nth-child(even) td { background: #F8FAFF; }
+        @media(max-width: 640px) {
+          .bp-table { font-size: 13px; }
+          .bp-table th, .bp-table td { padding: 10px 12px; }
+        }
         .bp-layout { display: grid; grid-template-columns: 1fr 380px; gap: 32px; align-items: start; }
         .bp-article-col { position: relative; }
         .bp-sidebar-slot { position: relative; }
+        .bp-sidebar-slot div::-webkit-scrollbar { width: 5px; }
+        .bp-sidebar-slot div::-webkit-scrollbar-thumb { background: rgba(21,101,192,0.2); border-radius: 10px; }
+        .bp-sidebar-slot div::-webkit-scrollbar-track { background: transparent; }
         @media(max-width: 960px) {
           .bp-layout { grid-template-columns: 1fr; }
         }
@@ -276,10 +332,20 @@ export default function BlogPost() {
 
             {/* RIGHT — slot reserves grid space; box is JS-positioned (fixed while scrolling, absolute when article ends) */}
             <div className="bp-sidebar-slot" ref={sidebarSlotRef} style={{ minHeight: '1px' }}>
-              <div ref={sidebarBoxRef} style={{ ...sidebarStyle, background: '#fff', borderRadius: '16px', padding: '24px', border: '1px solid rgba(21,101,192,0.1)', boxShadow: '0 4px 24px rgba(21,101,192,0.08)', boxSizing: 'border-box' }}>
-                <h2 style={{ fontFamily: 'Outfit,sans-serif', fontWeight: 800, fontSize: '20px', color: '#0A1628', marginBottom: '6px' }}>Compare Loan Offers</h2>
-                <p style={{ fontSize: '13px', color: '#7A90B8', marginBottom: '20px' }}>Get matched with top lenders in 2 minutes</p>
-                <EligibilityForm compact />
+              <div ref={sidebarBoxRef} style={{
+                  ...sidebarStyle,
+                  background: '#fff', borderRadius: '16px', border: '1px solid rgba(21,101,192,0.1)',
+                  boxShadow: '0 4px 24px rgba(21,101,192,0.08)', boxSizing: 'border-box',
+                  maxHeight: sidebarStyle.position === 'fixed' ? 'calc(100vh - 104px)' : 'none',
+                  overflowY: sidebarStyle.position === 'fixed' ? 'auto' : 'visible',
+                  overflowX: 'hidden',
+                  scrollbarWidth: 'thin',
+                }}>
+                <div style={{ padding: '24px' }}>
+                  <h2 style={{ fontFamily: 'Outfit,sans-serif', fontWeight: 800, fontSize: '20px', color: '#0A1628', marginBottom: '6px' }}>Compare Loan Offers</h2>
+                  <p style={{ fontSize: '13px', color: '#7A90B8', marginBottom: '20px' }}>Get matched with top lenders in 2 minutes</p>
+                  <EligibilityForm compact />
+                </div>
               </div>
             </div>
 
