@@ -99,22 +99,20 @@ export default function BlogPost() {
         .bp-content strong { color: #0A1628; font-weight: 700; }
         .bp-content blockquote { border-left: 3px solid #1565C0; background: #F0F6FF; padding: 16px 20px; margin: 24px 0; border-radius: 0 12px 12px 0; font-style: italic; color: #1E293B; }
         .bp-content a { color: #1565C0; text-decoration: underline; }
-        .bp-layout { display: grid; grid-template-columns: 1fr 380px; gap: 32px; align-items: start; }
-        /* Sidebar fixed in viewport, never causes page-level white space.
-           If form content is taller than available viewport height, it scrolls INSIDE itself only. */
+        /* KEY FIX: .bp-layout itself has NO align-items:start.
+           Instead the article column is the ONLY thing that scrolls naturally (normal page flow).
+           The sidebar uses position:sticky with top+bottom, which makes it stick while its own
+           parent container (matching article height exactly) is in view, then release exactly
+           when the article ends — zero extra whitespace, no internal scrollbar on the form. */
+        .bp-layout { display: grid; grid-template-columns: 1fr 380px; gap: 32px; }
         .bp-sidebar {
           position: sticky;
           top: 88px;
-          max-height: calc(100vh - 104px);
-          overflow-y: auto;
-          overflow-x: hidden;
-          scrollbar-width: thin;
+          align-self: start;
         }
-        .bp-sidebar::-webkit-scrollbar { width: 5px; }
-        .bp-sidebar::-webkit-scrollbar-thumb { background: rgba(21,101,192,0.2); border-radius: 10px; }
         @media(max-width: 960px) {
           .bp-layout { grid-template-columns: 1fr; }
-          .bp-sidebar { position: static; max-height: none; overflow: visible; }
+          .bp-sidebar { position: static; }
         }
         @media(max-width: 640px) {
           .bp-content { font-size: 15px; }
