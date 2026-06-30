@@ -553,10 +553,6 @@ async def system_status(u: str = Depends(verify_token)):
         "counters": {"total_leads": await db.leads.count_documents({}), "loan_apps": await db.loan_apps.count_documents({}), "blog_posts": await db.blog_posts.count_documents({}), "contacts": await db.contacts.count_documents({}), "images": await db.images.count_documents({}), "version": "2.0.0", "service": "running"},
     }
 
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8001)
-
 # ─── DYNAMIC PAGES ────────────────────────────────────────────────────────────
 
 @app.get("/api/pages/{slug}")
@@ -608,3 +604,76 @@ async def toggle_page_status(page_id: str, u: str = Depends(verify_token)):
     new_status = "draft" if page.get("status") == "published" else "published"
     await db.dynamic_pages.update_one({"id": page_id}, {"$set": {"status": new_status, "updated_at": datetime.now(timezone.utc).isoformat()}})
     return {"success": True, "status": new_status}
+
+
+# ─── COMMUNITY REJECTION BOARD ────────────────────────────────────────────────
+
+class RejectionStoryCreate(BaseModel):
+    lender_name: str
+    reason: str
+    cibil_range: Optional[str] = None
+    employment_type: Optional[str] = None
+    story: str
+    display_name: Optional[str] = "Anonymous"
+
+@app.post("/api/rejection-stories")
+async def create_rejection_story(story: RejectionStoryCreate):
+    d = story.model_dump()
+    d["id"] = str(uuid.uuid4())
+    d["created_at"] = datetime.now(timezone.utc).isoformat()
+    d["approved"] = False
+    await db.rejection_stories.insert_one(d)
+    return {"success": True, "message": "Thanks for sharing! Your story will appear after a quick review."}
+
+@app.get("/api/rejection-stories")
+async def get_rejection_stories(lender: Optional[str] = None, limit: int = 50):
+    query = {"approved": True}
+    if lender:
+        query["lender_name"] = {"$regex": lender, "$options": "i"}
+    return await db.rejection_stories.find(query, {"_id": 0}).sort("created_at", -1).to_list(limit)
+
+@app.get("/api/admin/rejection-stories")
+async def admin_get_rejection_stories(u: str = Depends(verify_token)):
+    return await db.rejection_stories.find({}, {"_id": 0}).sort("created_at", -1).to_list(500)
+
+@app.post("/api/admin/rejection-stories/{story_id}/approve")
+async def approve_rejection_story(story_id: str, u: str = Depends(verify_token)):
+    result = await db.rejection_stories.update_one({"id": story_id}, {"$set": {"approved": True}})
+    if result.matched_count == 0:
+        raise HTTPException(404, "Story not found")
+    return {"success": True}
+
+@app.delete("/api/admin/rejection-stories/{story_id}")
+async def delete_rejection_story(story_id: str, u: str = Depends(verify_token)):
+    await db.rejection_stories.delete_one({"id": story_id})
+    return {"success": True}
+
+# ─── WEEKLY RATE TRACKER ───────────────────────────────────────────────────────
+
+class RateSnapshotCreate(BaseModel):
+    lender_name: str
+    current_rate_min: float
+    current_rate_max: float
+    previous_rate_min: Optional[float] = None
+    previous_rate_max: Optional[float] = None
+    week_label: str
+
+@app.get("/api/rate-tracker")
+async def get_rate_tracker():
+    return await db.rate_snapshots.find({}, {"_id": 0}).sort("updated_at", -1).to_list(50)
+
+@app.post("/api/admin/rate-tracker")
+async def upsert_rate_snapshot(snap: RateSnapshotCreate, u: str = Depends(verify_token)):
+    d = snap.model_dump()
+    d["updated_at"] = datetime.now(timezone.utc).isoformat()
+    await db.rate_snapshots.update_one({"lender_name": snap.lender_name}, {"$set": d}, upsert=True)
+    return {"success": True}
+
+@app.get("/api/admin/rate-tracker")
+async def admin_get_rate_tracker(u: str = Depends(verify_token)):
+    return await db.rate_snapshots.find({}, {"_id": 0}).sort("lender_name", 1).to_list(50)
+
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8001)
