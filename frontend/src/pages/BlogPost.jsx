@@ -216,35 +216,59 @@ export default function BlogPost() {
         .bp-content a { color: #1565C0; text-decoration: underline; }
 
         /* Tables — horizontal scroll on mobile, with a visible scroll hint so users know to swipe */
+        /* Table wrapper — pure horizontal scroll container, full edge-to-edge on mobile */
         .bp-table-wrap {
-          position: relative;
-          overflow-x: auto;
+          overflow-x: scroll;
+          -webkit-overflow-scrolling: touch;
           margin: 20px 0;
           border-radius: 12px;
           border: 1px solid rgba(21,101,192,0.12);
-          -webkit-overflow-scrolling: touch;
-          /* Fade-out edge on the right hints there's more content to scroll to */
-          -webkit-mask-image: linear-gradient(to right, black 0%, black 96%, transparent 100%);
-          mask-image: linear-gradient(to right, black 0%, black 96%, transparent 100%);
         }
-        .bp-table { width: 100%; border-collapse: collapse; min-width: 420px; font-size: 14px; }
-        .bp-table th { background: linear-gradient(135deg,#1565C0,#0288D1); color: #fff; text-align: left; padding: 12px 14px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; white-space: nowrap; }
-        .bp-table td { padding: 12px 14px; border-bottom: 1px solid rgba(21,101,192,0.08); color: #334155; white-space: nowrap; }
+        .bp-table {
+          width: max-content;
+          min-width: 100%;
+          border-collapse: collapse;
+          font-size: 14px;
+        }
+        .bp-table th {
+          background: linear-gradient(135deg,#1565C0,#0288D1);
+          color: #fff;
+          text-align: left;
+          padding: 12px 16px;
+          font-size: 11px;
+          text-transform: uppercase;
+          letter-spacing: 0.04em;
+          white-space: nowrap;
+        }
+        .bp-table td {
+          padding: 12px 16px;
+          border-bottom: 1px solid rgba(21,101,192,0.08);
+          color: #334155;
+          white-space: nowrap;
+        }
         .bp-table tr:last-child td { border-bottom: none; }
         .bp-table tr:nth-child(even) td { background: #F8FAFF; }
-        /* Sticky first column on mobile — lender name stays visible while scrolling right */
+
+        /* Mobile: edge-to-edge full-bleed scroll, visible scrollbar so users SEE it's scrollable */
         @media(max-width: 640px) {
-          .bp-table { font-size: 12.5px; min-width: 360px; }
-          .bp-table th, .bp-table td { padding: 9px 10px; }
-          .bp-table th:first-child, .bp-table td:first-child {
-            position: sticky; left: 0; z-index: 1;
-            box-shadow: 2px 0 4px rgba(0,0,0,0.04);
+          .bp-table-wrap {
+            margin-left: -20px;
+            margin-right: -20px;
+            border-radius: 0;
+            border-left: none;
+            border-right: none;
+            padding: 0 20px;
+            box-sizing: border-box;
           }
-          .bp-table td:first-child { background: #fff; font-weight: 600; }
-          .bp-table tr:nth-child(even) td:first-child { background: #F8FAFF; }
-          .bp-table th:first-child { background: #1565C0; }
+          .bp-table { font-size: 13px; }
+          .bp-table th, .bp-table td { padding: 10px 14px; }
+          /* Visible scrollbar on mobile so the table doesn't look "broken" — it clearly shows more content exists */
+          .bp-table-wrap::-webkit-scrollbar { height: 6px; }
+          .bp-table-wrap::-webkit-scrollbar-track { background: rgba(21,101,192,0.06); border-radius: 10px; }
+          .bp-table-wrap::-webkit-scrollbar-thumb { background: rgba(21,101,192,0.35); border-radius: 10px; }
+          .bp-table-wrap { scrollbar-width: thin; scrollbar-color: rgba(21,101,192,0.35) rgba(21,101,192,0.06); }
         }
-        /* Small swipe hint shown only on mobile, above the table */
+
         .bp-table-hint { display: none; font-size: 11px; color: #94A3B8; margin-bottom: 6px; align-items: center; gap: 4px; }
         @media(max-width: 640px) {
           .bp-table-hint { display: flex; }
