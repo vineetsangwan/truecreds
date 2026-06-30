@@ -72,10 +72,24 @@ export default function BlogPost() {
     }).catch(() => {});
   }, [slug]);
 
-  // Manual sticky-until-content-ends logic — immune to parent transform/overflow issues
+  // Manual sticky-until-content-ends logic — immune to parent transform/overflow issues.
+  // Box height is measured ONCE (in normal flow, before any position change) so the
+  // calculation never breaks once the element becomes position:fixed.
+  const boxHeightRef = useRef(0);
+
   useEffect(() => {
     const NAVBAR_OFFSET = 88;
-    const BOTTOM_GAP = 24;
+    const BOTTOM_GAP = 32;
+
+    // Capture natural height once content is rendered (form fields, button, disclaimer text)
+    const measureHeight = () => {
+      if (sidebarBoxRef.current) {
+        const prevStyle = sidebarBoxRef.current.style.position;
+        sidebarBoxRef.current.style.position = 'static';
+        boxHeightRef.current = sidebarBoxRef.current.offsetHeight;
+        sidebarBoxRef.current.style.position = prevStyle;
+      }
+    };
 
     const onScroll = () => {
       const slot = sidebarSlotRef.current;
@@ -83,37 +97,46 @@ export default function BlogPost() {
       const articleCol = articleColRef.current;
       if (!slot || !box || !articleCol) return;
 
-      // Desktop only — below 960px we let it flow naturally (CSS handles mobile stacking)
       if (window.innerWidth < 960) {
-        setSidebarStyle({ position: 'static' });
+        setSidebarStyle({ position: 'static', width: '100%' });
         return;
       }
 
+      const boxHeight = boxHeightRef.current || box.offsetHeight;
       const slotRect = slot.getBoundingClientRect();
       const articleRect = articleCol.getBoundingClientRect();
-      const boxHeight = box.offsetHeight;
 
-      const articleBottomInViewport = articleRect.bottom; // where article ends, relative to viewport
+      const articleColTop = articleRect.top + window.scrollY;
+      const articleColHeight = articleCol.offsetHeight;
+      const articleColBottom = articleColTop + articleColHeight;
 
-      if (slotRect.top > NAVBAR_OFFSET) {
-        // Haven't scrolled to the sidebar yet — let it sit in normal flow
+      const scrollY = window.scrollY;
+      const stickyStart = articleColTop - NAVBAR_OFFSET;          // scroll position where sidebar should start sticking
+      const stickyEnd = articleColBottom - boxHeight - BOTTOM_GAP - NAVBAR_OFFSET; // scroll position where it should stop
+
+      if (scrollY < stickyStart) {
+        // Above the article — sidebar sits in normal flow at the top
         setSidebarStyle({ position: 'static', width: '100%' });
-      } else if (articleBottomInViewport > NAVBAR_OFFSET + boxHeight + BOTTOM_GAP) {
-        // Sidebar sticks to viewport top while article still has room below it.
-        // Use fixed + explicit left (viewport-relative) so it lines up with the slot column.
+      } else if (scrollY < stickyEnd) {
+        // Mid-article — sidebar pinned to viewport
         setSidebarStyle({ position: 'fixed', top: NAVBAR_OFFSET, left: slotRect.left, width: slotRect.width });
       } else {
-        // Article is ending — release sidebar, pin it to bottom of article column instead (no whitespace gap)
-        setSidebarStyle({ position: 'absolute', bottom: 0, top: 'auto', left: 0, width: '100%' });
+        // Near/past article end — sidebar rests at bottom of article column, scrolls away with content normally
+        setSidebarStyle({ position: 'absolute', top: articleColHeight - boxHeight, left: 0, width: '100%' });
       }
     };
 
+    measureHeight();
     window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', onScroll);
+    window.addEventListener('resize', () => { measureHeight(); onScroll(); });
+    // Re-measure after images/content settle
+    const t = setTimeout(() => { measureHeight(); onScroll(); }, 300);
     onScroll();
+
     return () => {
       window.removeEventListener('scroll', onScroll);
       window.removeEventListener('resize', onScroll);
+      clearTimeout(t);
     };
   }, [post]);
 
@@ -164,7 +187,7 @@ export default function BlogPost() {
       `}</style>
 
       {/* ── Dark Blue Header — Breadcrumb + Title + Byline ── */}
-      <div style={{ background: 'linear-gradient(135deg,#0A1628,#1E3A5F)', padding: '24px 0 36px' }}>
+      <div style={{ background: 'linear-gradient(135deg,#0A1628,#1E3A5F)', padding: '36px 0 56px' }}>
         <div style={{ maxWidth: '1180px', margin: '0 auto', padding: '0 20px' }}>
 
           {/* Breadcrumb */}
