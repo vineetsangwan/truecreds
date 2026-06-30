@@ -285,7 +285,7 @@ function LoanQuiz() {
       <div style={{ fontSize: '28px', fontWeight: 900, color: '#0A1628', fontFamily: 'Outfit,sans-serif', marginBottom: '8px' }}>{result.name}</div>
       <div style={{ fontSize: '22px', fontWeight: 700, color: '#1565C0', marginBottom: '12px' }}>from {result.rate} p.a.</div>
       <div style={{ fontSize: '14px', color: '#3B5280', marginBottom: '24px', padding: '12px', background: 'rgba(21,101,192,0.06)', borderRadius: '10px' }}>{result.reason}</div>
-      <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap', marginBottom: '12px' }}>
         <Link to={result.link}>
           <button style={{ background: '#1565C0', color: 'white', border: 'none', borderRadius: '10px', padding: '12px 24px', fontWeight: 700, fontSize: '14px', cursor: 'pointer' }}>
             Apply Now →
@@ -296,6 +296,13 @@ function LoanQuiz() {
           Retake Quiz
         </button>
       </div>
+      <button onClick={() => {
+        const text = encodeURIComponent(`I matched with ${result.name} at ${result.rate} p.a. on TrueCreds! Find your best loan match too: https://truecreds.in`);
+        window.open(`https://wa.me/?text=${text}`, '_blank');
+      }}
+        style={{ background: '#25D366', color: '#fff', border: 'none', borderRadius: '10px', padding: '10px 20px', fontWeight: 600, fontSize: '13px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+        📤 Share Result on WhatsApp
+      </button>
     </motion.div>
   );
 
