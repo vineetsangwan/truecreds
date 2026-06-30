@@ -50,6 +50,17 @@ export default function Navbar() {
 
   useEffect(() => { setMobileOpen(false); setDropdownOpen(null); }, [loc.pathname]);
 
+  // Signal to other fixed UI (like StickyCta) that the mobile drawer is open,
+  // so they can hide themselves and avoid a "double button" look.
+  useEffect(() => {
+    if (mobileOpen) {
+      document.body.classList.add('mobile-nav-open');
+    } else {
+      document.body.classList.remove('mobile-nav-open');
+    }
+    return () => document.body.classList.remove('mobile-nav-open');
+  }, [mobileOpen]);
+
   useEffect(() => {
     const h = (e) => { if (dropRef.current && !dropRef.current.contains(e.target)) setDropdownOpen(null); };
     document.addEventListener('mousedown', h);
@@ -63,13 +74,14 @@ export default function Navbar() {
     <>
       <motion.nav
         initial={{ y: -80, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-        className="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
+        animate={{ y: 0, opacity: mobileOpen ? 0 : 1 }}
+        transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+        className="fixed top-0 left-0 right-0 z-30 transition-all duration-300"
         style={{
           background: scrolled ? 'rgba(255,255,255,0.97)' : 'rgba(240,246,255,0.9)',
           backdropFilter: 'blur(20px)',
           boxShadow: scrolled ? '0 1px 0 rgba(21,101,192,0.1), 0 8px 32px rgba(21,101,192,0.08)' : '0 1px 0 rgba(21,101,192,0.08)',
+          pointerEvents: mobileOpen ? 'none' : 'auto',
         }}
       >
         <div className="h-[2px] w-full" style={{ background: 'linear-gradient(90deg, #1565C0, #0288D1, #1565C0)' }} />
