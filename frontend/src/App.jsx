@@ -26,6 +26,11 @@ import Glossary from './pages/Glossary';
 import SalaryEstimator from './pages/SalaryEstimator';
 import CibilRoadmap from './pages/CibilRoadmap';
 import RedFlags from './pages/RedFlags';
+import RejectionStories from './pages/RejectionStories';
+import RateTracker from './pages/RateTracker';
+import CityMatcher from './pages/CityMatcher';
+import RealCostCalculator from './pages/RealCostCalculator';
+import DocumentChecklist from './pages/DocumentChecklist';
 import './index.css';
 import ScrollToTop from './components/ScrollToTop';
 
@@ -64,6 +69,11 @@ export default function App() {
         <Route path="/salary-estimator" element={<Layout><SalaryEstimator /></Layout>} />
         <Route path="/cibil-roadmap" element={<Layout><CibilRoadmap /></Layout>} />
         <Route path="/red-flags" element={<Layout><RedFlags /></Layout>} />
+        <Route path="/rejection-stories" element={<Layout><RejectionStories /></Layout>} />
+        <Route path="/rate-tracker" element={<Layout><RateTracker /></Layout>} />
+        <Route path="/city-matcher" element={<Layout><CityMatcher /></Layout>} />
+        <Route path="/real-cost-calculator" element={<Layout><RealCostCalculator /></Layout>} />
+        <Route path="/document-checklist" element={<Layout><DocumentChecklist /></Layout>} />
       </Routes>
     </BrowserRouter>
   );
