@@ -60,7 +60,7 @@ export default function Footer() {
           {/* Tools */}
           <div>
             <div style={{ fontSize: '10px', fontFamily: 'monospace', textTransform: 'uppercase', letterSpacing: '0.2em', color: '#60A5FA', marginBottom: '16px' }}>Tools</div>
-            {[['/compare','Compare Lenders'],['/calculator','EMI Calculator'],['/apply','Check Eligibility'],['/rejection-checker','Rejection Checker'],['/emi-vs-sip','EMI vs SIP'],['/salary-estimator','Salary Estimator'],['/glossary','Loan Glossary'],['/cibil-roadmap','CIBIL Roadmap'],['/red-flags','Avoid Scams'],['/blog','Financial Tips']].map(([to, label]) => (
+            {[['/compare','Compare Lenders'],['/calculator','EMI Calculator'],['/apply','Check Eligibility'],['/rejection-checker','Rejection Checker'],['/emi-vs-sip','EMI vs SIP'],['/salary-estimator','Salary Estimator'],['/glossary','Loan Glossary'],['/cibil-roadmap','CIBIL Roadmap'],['/red-flags','Avoid Scams'],['/rejection-stories','Rejection Stories'],['/rate-tracker','Rate Tracker'],['/city-matcher','City Matcher'],['/real-cost-calculator','Real Cost Calculator'],['/document-checklist','Document Checklist'],['/blog','Financial Tips']].map(([to, label]) => (
               <Link key={to} to={to} style={linkStyle} {...hover}>{label}</Link>
             ))}
             <div style={{ fontSize: '10px', fontFamily: 'monospace', textTransform: 'uppercase', letterSpacing: '0.2em', color: '#60A5FA', margin: '16px 0 10px' }}>Cities</div>
