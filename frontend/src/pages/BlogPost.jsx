@@ -100,11 +100,21 @@ export default function BlogPost() {
         .bp-content blockquote { border-left: 3px solid #1565C0; background: #F0F6FF; padding: 16px 20px; margin: 24px 0; border-radius: 0 12px 12px 0; font-style: italic; color: #1E293B; }
         .bp-content a { color: #1565C0; text-decoration: underline; }
         .bp-layout { display: grid; grid-template-columns: 1fr 380px; gap: 32px; align-items: start; }
-        .bp-sidebar-wrap { height: 100%; }
-        .bp-sidebar { position: sticky; top: 88px; max-height: calc(100vh - 104px); overflow: visible; }
+        /* Sidebar fixed in viewport, never causes page-level white space.
+           If form content is taller than available viewport height, it scrolls INSIDE itself only. */
+        .bp-sidebar {
+          position: sticky;
+          top: 88px;
+          max-height: calc(100vh - 104px);
+          overflow-y: auto;
+          overflow-x: hidden;
+          scrollbar-width: thin;
+        }
+        .bp-sidebar::-webkit-scrollbar { width: 5px; }
+        .bp-sidebar::-webkit-scrollbar-thumb { background: rgba(21,101,192,0.2); border-radius: 10px; }
         @media(max-width: 960px) {
           .bp-layout { grid-template-columns: 1fr; }
-          .bp-sidebar { position: static; max-height: none; }
+          .bp-sidebar { position: static; max-height: none; overflow: visible; }
         }
         @media(max-width: 640px) {
           .bp-content { font-size: 15px; }
@@ -201,14 +211,12 @@ export default function BlogPost() {
               </div>
             </div>
 
-            {/* RIGHT — Sticky lead form, bounded by article column height (CSS Grid align-items:start + sticky) */}
-            <div className="bp-sidebar-wrap">
-              <div className="bp-sidebar">
-                <div style={{ background: '#fff', borderRadius: '16px', padding: '24px', border: '1px solid rgba(21,101,192,0.1)', boxShadow: '0 4px 24px rgba(21,101,192,0.08)' }}>
-                  <h2 style={{ fontFamily: 'Outfit,sans-serif', fontWeight: 800, fontSize: '20px', color: '#0A1628', marginBottom: '6px' }}>Compare Loan Offers</h2>
-                  <p style={{ fontSize: '13px', color: '#7A90B8', marginBottom: '20px' }}>Get matched with top lenders in 2 minutes</p>
-                  <EligibilityForm compact />
-                </div>
+            {/* RIGHT — Sticky, viewport-bounded. Scrolls internally only if form is taller than screen. */}
+            <div className="bp-sidebar">
+              <div style={{ background: '#fff', borderRadius: '16px', padding: '24px', border: '1px solid rgba(21,101,192,0.1)', boxShadow: '0 4px 24px rgba(21,101,192,0.08)' }}>
+                <h2 style={{ fontFamily: 'Outfit,sans-serif', fontWeight: 800, fontSize: '20px', color: '#0A1628', marginBottom: '6px' }}>Compare Loan Offers</h2>
+                <p style={{ fontSize: '13px', color: '#7A90B8', marginBottom: '20px' }}>Get matched with top lenders in 2 minutes</p>
+                <EligibilityForm compact />
               </div>
             </div>
 
