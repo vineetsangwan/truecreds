@@ -60,7 +60,7 @@ export default function Footer() {
           {/* Tools */}
           <div>
             <div style={{ fontSize: '10px', fontFamily: 'monospace', textTransform: 'uppercase', letterSpacing: '0.2em', color: '#60A5FA', marginBottom: '16px' }}>Tools</div>
-            {[['/compare','Compare Lenders'],['/calculator','EMI Calculator'],['/apply','Check Eligibility'],['/blog','Financial Tips']].map(([to, label]) => (
+            {[['/compare','Compare Lenders'],['/calculator','EMI Calculator'],['/apply','Check Eligibility'],['/rejection-checker','Rejection Checker'],['/blog','Financial Tips']].map(([to, label]) => (
               <Link key={to} to={to} style={linkStyle} {...hover}>{label}</Link>
             ))}
             <div style={{ fontSize: '10px', fontFamily: 'monospace', textTransform: 'uppercase', letterSpacing: '0.2em', color: '#60A5FA', margin: '16px 0 10px' }}>Cities</div>
