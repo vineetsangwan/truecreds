@@ -7,19 +7,41 @@ export default function Footer() {
 
   return (
     <footer style={{ background: '#0A1628', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+      <style>{`
+        .footer-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+          gap: 32px;
+          margin-bottom: 48px;
+        }
+        @media(max-width: 640px) {
+          .footer-grid {
+            grid-template-columns: 1fr 1fr !important;
+            gap: 24px 16px !important;
+          }
+          .footer-brand {
+            grid-column: span 2 !important;
+            margin-bottom: 8px;
+          }
+        }
+        @media(max-width: 360px) {
+          .footer-grid { gap: 20px 12px !important; }
+        }
+      `}</style>
+
       <div style={{ height: '2px', background: 'linear-gradient(90deg,#1565C0,#0288D1,#1565C0)' }} />
       <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '56px 20px 32px' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(160px,1fr))', gap: '32px', marginBottom: '48px' }}>
+        <div className="footer-grid">
 
-          {/* Brand */}
-          <div style={{ gridColumn: 'span 1' }}>
+          {/* Brand — spans full width on mobile */}
+          <div className="footer-brand">
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
               <span style={{ fontSize: '24px' }}>✅</span>
               <span style={{ fontFamily: 'Outfit,sans-serif', fontWeight: 900, fontSize: '20px', color: '#fff' }}>
                 True<span style={{ color: '#60A5FA' }}>Creds</span>
               </span>
             </div>
-            <p style={{ fontSize: '12px', color: '#94A3B8', lineHeight: 1.7, marginBottom: '10px' }}>
+            <p style={{ fontSize: '12px', color: '#94A3B8', lineHeight: 1.7, marginBottom: '10px', maxWidth: '320px' }}>
               India's trusted loan comparison platform. We compare, you choose — always for free.
             </p>
             <p style={{ fontSize: '11px', color: '#4B5563', lineHeight: 1.6 }}>
