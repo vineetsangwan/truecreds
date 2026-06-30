@@ -255,21 +255,12 @@ export default function BlogPost() {
         .bp-table tr:last-child td { border-bottom: none; }
         .bp-table tr:nth-child(even) td { background: #F8FAFF; }
 
-        /* Mobile: full edge-to-edge width. Scroll only kicks in for the part that overflows screen. */
+        /* Mobile table sizing — actual edge-to-edge margin handled in the single consolidated
+           mobile block further down (search "MOBILE: single consistent rule set"). This block
+           only handles font/padding/scrollbar, not positioning, to avoid conflicting margins. */
         @media(max-width: 640px) {
-          .bp-table-wrap {
-            margin-left: -20px;
-            margin-right: -20px;
-            width: calc(100% + 40px);
-            border-radius: 0;
-            border-left: none;
-            border-right: none;
-            padding: 0 20px;
-            box-sizing: border-box;
-          }
           .bp-table { font-size: 13px; }
           .bp-table th, .bp-table td { padding: 10px 14px; }
-          /* Visible scrollbar — only appears/matters once content actually overflows */
           .bp-table-wrap::-webkit-scrollbar { height: 6px; }
           .bp-table-wrap::-webkit-scrollbar-track { background: rgba(21,101,192,0.06); border-radius: 10px; }
           .bp-table-wrap::-webkit-scrollbar-thumb { background: rgba(21,101,192,0.35); border-radius: 10px; }
@@ -290,25 +281,53 @@ export default function BlogPost() {
           .bp-layout { grid-template-columns: minmax(0, 1fr); }
         }
         @media(max-width: 640px) {
+          .bp-outer-pad { padding-left: 16px !important; padding-right: 16px !important; }
+        }
+        /* ── MOBILE: single consistent rule set, no competing margin/padding tricks ── */
+        @media(max-width: 640px) {
           .bp-content { font-size: 15px; }
           .bp-content h2 { font-size: 1.3rem; }
           .bp-content h3 { font-size: 1.1rem; }
 
-          /* Article card → full width, edge-to-edge, no card chrome on mobile */
+          /* Article card: strip all card chrome, become a plain full-bleed block.
+             FIXED_PAD (16px) is the ONLY padding value used anywhere in this block —
+             every full-bleed element below cancels exactly this same amount. */
           .bp-article-card {
             background: transparent !important;
             border: none !important;
             border-radius: 0 !important;
             box-shadow: none !important;
-            padding: 0 !important;
-            margin-left: -20px !important;
-            margin-right: -20px !important;
-            width: calc(100% + 40px) !important;
+            padding: 16px 0 !important;
+            margin: 0 -16px !important;
+            width: calc(100% + 32px) !important;
           }
-          .bp-article-card > .bp-content,
+          /* Text content gets the 16px back so it doesn't touch screen edges */
+          .bp-article-card > .bp-content {
+            padding-left: 16px !important;
+            padding-right: 16px !important;
+          }
           .bp-article-card > div:last-child {
-            padding-left: 20px !important;
-            padding-right: 20px !important;
+            padding-left: 16px !important;
+            padding-right: 16px !important;
+          }
+          /* Table wrapper: cancel the .bp-content padding to go fully edge-to-edge.
+             No inner padding is added — the table's own th/td padding (10px 14px) provides
+             the visual breathing room, and the scrollable area starts right at the screen edge. */
+          .bp-content .bp-table-wrap {
+            margin-left: -16px !important;
+            margin-right: -16px !important;
+            width: calc(100% + 32px) !important;
+            border-radius: 0 !important;
+            border-left: none !important;
+            border-right: none !important;
+          }
+          .bp-content .bp-table-wrap .bp-table th:first-child,
+          .bp-content .bp-table-wrap .bp-table td:first-child {
+            padding-left: 16px !important;
+          }
+          .bp-content .bp-table-wrap .bp-table th:last-child,
+          .bp-content .bp-table-wrap .bp-table td:last-child {
+            padding-right: 16px !important;
           }
         }
       `}</style>
@@ -354,7 +373,7 @@ export default function BlogPost() {
 
       {/* ── Main 2-column layout: Article + Sticky Form ── */}
       <div style={{ background: '#F8FAFF', padding: '32px 0 0', overflowX: 'hidden' }}>
-        <div style={{ maxWidth: '1180px', margin: '0 auto', padding: '0 20px', overflowX: 'hidden' }}>
+        <div className="bp-outer-pad" style={{ maxWidth: '1180px', margin: '0 auto', padding: '0 20px', overflowX: 'hidden' }}>
           <div className="bp-layout">
 
             {/* LEFT — Article (its height bounds how far the sidebar can stick) */}
