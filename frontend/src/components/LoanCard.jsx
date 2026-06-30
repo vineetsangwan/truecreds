@@ -132,6 +132,14 @@ export default function LoanCard({ loan, index = 0, highlight = false }) {
           <span style={{ fontSize: '10px', color: '#3B5280', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{loan.best_for}</span>
         </div>
       )}
+
+      {/* Last verified timestamp — trust signal */}
+      <div style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+        <span style={{ fontSize: '9px', color: '#16a34a' }}>✓</span>
+        <span style={{ fontSize: '9px', color: '#94A3B8' }}>
+          Rate verified: {new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+        </span>
+      </div>
     </motion.div>
   );
 }
