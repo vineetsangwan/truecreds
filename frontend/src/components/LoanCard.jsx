@@ -11,13 +11,13 @@ export default function LoanCard({ loan, index = 0, highlight = false }) {
         border: highlight ? '1.5px solid rgba(21,101,192,0.35)' : '1px solid rgba(21,101,192,0.12)',
         boxShadow: highlight ? '0 8px 32px rgba(21,101,192,0.12)' : '0 2px 12px rgba(21,101,192,0.06)',
         borderRadius: '16px',
-        padding: '16px',
+        padding: highlight ? '26px 16px 16px' : '16px',
         position: 'relative',
         display: 'flex',
         flexDirection: 'column',
         height: '100%',
         boxSizing: 'border-box',
-        overflow: 'hidden',
+        overflow: 'visible',
         width: '100%',
       }}
       initial={{ opacity: 0, y: 24 }}
@@ -26,8 +26,23 @@ export default function LoanCard({ loan, index = 0, highlight = false }) {
       whileHover={{ y: -4, boxShadow: '0 20px 48px rgba(21,101,192,0.16)' }}
     >
       {highlight && (
-        <div style={{ position: 'absolute', top: '-10px', left: '16px', zIndex: 1 }}>
-          <span className="badge-mint" style={{ fontSize: '9px' }}>⭐ BEST CHOICE</span>
+        <div style={{ position: 'absolute', top: '-11px', left: '16px', zIndex: 2 }}>
+          <span style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '4px',
+            background: 'linear-gradient(135deg,#F59E0B,#FBBF24)',
+            color: '#7C2D12',
+            fontSize: '10px',
+            fontWeight: 800,
+            padding: '4px 10px',
+            borderRadius: '999px',
+            whiteSpace: 'nowrap',
+            boxShadow: '0 3px 10px rgba(245,158,11,0.4)',
+            border: '1.5px solid #fff',
+          }}>
+            ⭐ BEST CHOICE
+          </span>
         </div>
       )}
 
