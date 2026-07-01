@@ -178,6 +178,10 @@ function BlogTab() {
     cover_image: "",
     read_time: "5 min",
     status: "publish",
+    meta_title: "",
+    meta_description: "",
+    canonical_url: "",
+    author: "TrueCreds Editorial Team",
   };
   const CATEGORIES = [
     "Personal Loan",
@@ -259,6 +263,10 @@ function BlogTab() {
       cover_image: post.cover_image || "",
       read_time: post.read_time || "5 min",
       status: post.status || "publish",
+      meta_title: post.meta_title || "",
+      meta_description: post.meta_description || "",
+      canonical_url: post.canonical_url || "",
+      author: post.author || "TrueCreds Editorial Team",
     });
     setEditId(post.id);
     setView("edit");
@@ -421,7 +429,7 @@ function BlogTab() {
         {/* Excerpt */}
         <div>
           <label className="text-xs text-slate-500 uppercase tracking-wider mb-1.5 block">
-            Excerpt (short description)
+            Excerpt (short description — shown on blog listing page)
           </label>
           <input
             className="input-cosmic"
@@ -431,8 +439,87 @@ function BlogTab() {
           />
         </div>
 
-        {/* Category + Read Time + Status */}
-        <div className="grid grid-cols-3 gap-4">
+        {/* ── SEO SECTION ── */}
+        <div
+          className="p-4 rounded-xl border"
+          style={{
+            background: "rgba(0,255,157,0.03)",
+            borderColor: "rgba(0,255,157,0.15)",
+          }}
+        >
+          <div className="flex items-center gap-2 mb-4">
+            <span className="text-sm">🔍</span>
+            <span className="text-xs font-semibold text-[#00FF9D] uppercase tracking-wider">
+              SEO Settings
+            </span>
+          </div>
+
+          <div className="space-y-4">
+            {/* Meta Title */}
+            <div>
+              <label className="text-xs text-slate-500 uppercase tracking-wider mb-1.5 block">
+                Meta Title{" "}
+                <span className="text-slate-700 normal-case">
+                  — shown as the clickable title in Google search results. Leave
+                  blank to fall back to the Title field above. Aim for 50-60
+                  characters.
+                </span>
+              </label>
+              <input
+                className="input-cosmic"
+                placeholder="e.g. Personal Loan Without CIBIL Score (2026 Guide) | TrueCreds"
+                value={form.meta_title}
+                onChange={(e) => set("meta_title", e.target.value)}
+                maxLength={70}
+              />
+              <p className="text-[10px] text-slate-600 mt-1">
+                {form.meta_title.length}/60 characters
+              </p>
+            </div>
+
+            {/* Meta Description */}
+            <div>
+              <label className="text-xs text-slate-500 uppercase tracking-wider mb-1.5 block">
+                Meta Description{" "}
+                <span className="text-slate-700 normal-case">
+                  — the snippet shown under the title in search results. Aim for
+                  140-160 characters.
+                </span>
+              </label>
+              <input
+                className="input-cosmic"
+                placeholder="Compare NBFCs and apps that approve personal loans without a CIBIL score..."
+                value={form.meta_description}
+                onChange={(e) => set("meta_description", e.target.value)}
+                maxLength={170}
+              />
+              <p className="text-[10px] text-slate-600 mt-1">
+                {form.meta_description.length}/160 characters
+              </p>
+            </div>
+
+            {/* Canonical URL */}
+            <div>
+              <label className="text-xs text-slate-500 uppercase tracking-wider mb-1.5 block">
+                Canonical URL{" "}
+                <span className="text-slate-700 normal-case">
+                  — leave blank unless this content is duplicated elsewhere
+                  (e.g. also published on Medium or a partner site). Defaults to
+                  https://truecreds.in/blog/{form.slug || "your-slug"}
+                </span>
+              </label>
+              <input
+                className="input-cosmic"
+                placeholder={`https://truecreds.in/blog/${form.slug || "your-slug"}`}
+                value={form.canonical_url}
+                onChange={(e) => set("canonical_url", e.target.value)}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Category + Read Time + Status + Author */}
+        <div className="grid grid-cols-4 gap-4">
           <div>
             <label className="text-xs text-slate-500 uppercase tracking-wider mb-1.5 block">
               Category
@@ -470,6 +557,17 @@ function BlogTab() {
               <option value="publish">Published</option>
               <option value="draft">Draft</option>
             </select>
+          </div>
+          <div>
+            <label className="text-xs text-slate-500 uppercase tracking-wider mb-1.5 block">
+              Author
+            </label>
+            <input
+              className="input-cosmic"
+              placeholder="TrueCreds Editorial Team"
+              value={form.author}
+              onChange={(e) => set("author", e.target.value)}
+            />
           </div>
         </div>
 

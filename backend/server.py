@@ -85,6 +85,10 @@ class BlogPostCreate(BaseModel):
     cover_image: Optional[str] = ""
     read_time: Optional[str] = "5 min"
     status: Optional[str] = "publish"
+    meta_title: Optional[str] = ""
+    meta_description: Optional[str] = ""
+    canonical_url: Optional[str] = ""
+    author: Optional[str] = "TrueCreds Editorial Team"
 
 class BlogPostUpdate(BaseModel):
     title: Optional[str] = None
@@ -95,6 +99,10 @@ class BlogPostUpdate(BaseModel):
     cover_image: Optional[str] = None
     read_time: Optional[str] = None
     status: Optional[str] = None
+    meta_title: Optional[str] = None
+    meta_description: Optional[str] = None
+    canonical_url: Optional[str] = None
+    author: Optional[str] = None
 
 class PageSection(BaseModel):
     type: str
@@ -148,11 +156,11 @@ SEED_LOANS = [
 
 NOW_ISO = datetime.now(timezone.utc).isoformat()
 SEED_BLOGS = [
-    {"id": str(uuid.uuid4()), "slug": "best-loan-apps-india-2026", "title": "Best Instant Loan Apps in India 2026", "excerpt": "We compared 12+ lenders on rate, speed, CIBIL requirements and disbursal time.", "content": "## Best Instant Loan Apps in India 2026\n\nWith hundreds of lending apps, choosing the right one is overwhelming. We have compared 12+ RBI-registered lenders.\n\n### Our Top Picks\n\n**Navi** leads for salaried professionals with rates from 9.9%. **KreditBee** tops for low/no CIBIL. **Bajaj Finserv** wins for high-value borrowers.\n\n### How We Rank\n\nInterest rate (40%) + Approval speed (25%) + CIBIL flexibility (20%) + User ratings (15%).", "category": "Guides", "read_time": "6 min", "cover_image": "", "published_at": NOW_ISO, "source": "local"},
-    {"id": str(uuid.uuid4()), "slug": "loan-with-low-cibil", "title": "How to Get a Personal Loan with Low CIBIL Score", "excerpt": "A low CIBIL score does not have to mean rejection. Here is what actually works.", "content": "## Getting a Loan with Low CIBIL\n\nA CIBIL below 650 can feel like a dead end. But fintechs like KreditBee, LazyPay and mPokket accept scores as low as 0.\n\n### Tips\n\n1. Show consistent salary credits\n2. Reduce credit utilization below 30%\n3. Avoid multiple simultaneous applications\n4. Start with smaller loan amounts to build history", "category": "Tips", "read_time": "4 min", "cover_image": "", "published_at": NOW_ISO, "source": "local"},
-    {"id": str(uuid.uuid4()), "slug": "hidden-charges-loan-apps", "title": "Hidden Charges in Loan Apps You Must Know", "excerpt": "Processing fees, prepayment penalties, bounce charges — the fine print decoded.", "content": "## Hidden Charges in Loan Apps\n\n### Processing Fee\n1 to 3% upfront. On 1 lakh = 1000 to 3000 gone before you see the money.\n\n### Prepayment Charges\n2 to 5% of outstanding principal for early repayment.\n\n### Bounce Charges\n500 to 1500 per missed EMI plus penal interest.\n\n### GST\n18% GST applies on all fees — not on interest, but it adds up.", "category": "Guide", "read_time": "5 min", "cover_image": "", "published_at": NOW_ISO, "source": "local"},
-    {"id": str(uuid.uuid4()), "slug": "student-loan-tips-india", "title": "Student Loan Tips: Getting Funds Without a Job", "excerpt": "Studying and need cash? Here is how students can access loans in India.", "content": "## Student Loan Tips\n\n**mPokket** is purpose-built for students — borrow from 500 with just your college ID.\n\n**Credila** (HDFC subsidiary) offers up to 75 lakhs for higher studies.\n\n### Documents Required\n- College ID or admission letter\n- Parent income proof\n- Bank account 6-month statement\n- Aadhaar and PAN", "category": "Students", "read_time": "4 min", "cover_image": "", "published_at": NOW_ISO, "source": "local"},
-    {"id": str(uuid.uuid4()), "slug": "aadhaar-loan-explained", "title": "Aadhaar-Based Loans: How They Work in 2026", "excerpt": "Get a loan using just your Aadhaar card. The complete eKYC process explained.", "content": "## Aadhaar-Based Loans Explained\n\nAadhaar eKYC has revolutionized loan disbursal. Many NBFCs now offer instant loans using just your 12-digit Aadhaar number.\n\n### Process\n1. Enter your Aadhaar number in the app\n2. OTP sent to your Aadhaar-linked mobile\n3. Lender fetches KYC directly from UIDAI\n4. No physical documents needed\n\nRates range from 12 to 36% depending on profile.", "category": "Guide", "read_time": "3 min", "cover_image": "", "published_at": NOW_ISO, "source": "local"},
+    {"id": str(uuid.uuid4()), "slug": "best-loan-apps-india-2026", "title": "Best Instant Loan Apps in India 2026", "excerpt": "We compared 12+ lenders on rate, speed, CIBIL requirements and disbursal time.", "content": "## Best Instant Loan Apps in India 2026\n\nWith hundreds of lending apps, choosing the right one is overwhelming. We have compared 12+ RBI-registered lenders.\n\n### Our Top Picks\n\n**Navi** leads for salaried professionals with rates from 9.9%. **KreditBee** tops for low/no CIBIL. **Bajaj Finserv** wins for high-value borrowers.\n\n### How We Rank\n\nInterest rate (40%) + Approval speed (25%) + CIBIL flexibility (20%) + User ratings (15%).", "category": "Guides", "read_time": "6 min", "cover_image": "", "published_at": NOW_ISO, "source": "local", "meta_title": "", "meta_description": "", "canonical_url": "", "author": "TrueCreds Editorial Team"},
+    {"id": str(uuid.uuid4()), "slug": "loan-with-low-cibil", "title": "How to Get a Personal Loan with Low CIBIL Score", "excerpt": "A low CIBIL score does not have to mean rejection. Here is what actually works.", "content": "## Getting a Loan with Low CIBIL\n\nA CIBIL below 650 can feel like a dead end. But fintechs like KreditBee, LazyPay and mPokket accept scores as low as 0.\n\n### Tips\n\n1. Show consistent salary credits\n2. Reduce credit utilization below 30%\n3. Avoid multiple simultaneous applications\n4. Start with smaller loan amounts to build history", "category": "Tips", "read_time": "4 min", "cover_image": "", "published_at": NOW_ISO, "source": "local", "meta_title": "", "meta_description": "", "canonical_url": "", "author": "TrueCreds Editorial Team"},
+    {"id": str(uuid.uuid4()), "slug": "hidden-charges-loan-apps", "title": "Hidden Charges in Loan Apps You Must Know", "excerpt": "Processing fees, prepayment penalties, bounce charges — the fine print decoded.", "content": "## Hidden Charges in Loan Apps\n\n### Processing Fee\n1 to 3% upfront. On 1 lakh = 1000 to 3000 gone before you see the money.\n\n### Prepayment Charges\n2 to 5% of outstanding principal for early repayment.\n\n### Bounce Charges\n500 to 1500 per missed EMI plus penal interest.\n\n### GST\n18% GST applies on all fees — not on interest, but it adds up.", "category": "Guide", "read_time": "5 min", "cover_image": "", "published_at": NOW_ISO, "source": "local", "meta_title": "", "meta_description": "", "canonical_url": "", "author": "TrueCreds Editorial Team"},
+    {"id": str(uuid.uuid4()), "slug": "student-loan-tips-india", "title": "Student Loan Tips: Getting Funds Without a Job", "excerpt": "Studying and need cash? Here is how students can access loans in India.", "content": "## Student Loan Tips\n\n**mPokket** is purpose-built for students — borrow from 500 with just your college ID.\n\n**Credila** (HDFC subsidiary) offers up to 75 lakhs for higher studies.\n\n### Documents Required\n- College ID or admission letter\n- Parent income proof\n- Bank account 6-month statement\n- Aadhaar and PAN", "category": "Students", "read_time": "4 min", "cover_image": "", "published_at": NOW_ISO, "source": "local", "meta_title": "", "meta_description": "", "canonical_url": "", "author": "TrueCreds Editorial Team"},
+    {"id": str(uuid.uuid4()), "slug": "aadhaar-loan-explained", "title": "Aadhaar-Based Loans: How They Work in 2026", "excerpt": "Get a loan using just your Aadhaar card. The complete eKYC process explained.", "content": "## Aadhaar-Based Loans Explained\n\nAadhaar eKYC has revolutionized loan disbursal. Many NBFCs now offer instant loans using just your 12-digit Aadhaar number.\n\n### Process\n1. Enter your Aadhaar number in the app\n2. OTP sent to your Aadhaar-linked mobile\n3. Lender fetches KYC directly from UIDAI\n4. No physical documents needed\n\nRates range from 12 to 36% depending on profile.", "category": "Guide", "read_time": "3 min", "cover_image": "", "published_at": NOW_ISO, "source": "local", "meta_title": "", "meta_description": "", "canonical_url": "", "author": "TrueCreds Editorial Team"},
 ]
 
 @app.on_event("startup")
@@ -202,6 +210,8 @@ def _normalize_wp_post(p: dict) -> dict:
         "content": content, "category": "Guide", "read_time": read_time,
         "cover_image": img, "published_at": p.get("date", ""),
         "source": "wordpress", "wp_id": p["id"], "wp_link": p.get("link", ""),
+        "meta_title": "", "meta_description": excerpt[:160], "canonical_url": p.get("link", ""),
+        "author": "TrueCreds Editorial Team",
     }
 
 def _fetch_wp_posts_sync(cfg: dict, per_page: int = 12, page: int = 1) -> List[dict]:
@@ -499,10 +509,16 @@ async def admin_get_blog_posts(u: str = Depends(verify_token)):
 async def admin_create_blog_post(body: BlogPostCreate, u: str = Depends(verify_token)):
     existing = await db.blog_posts.find_one({"slug": body.slug})
     if existing: raise HTTPException(400, "A post with this slug already exists")
+    # If meta_title/canonical_url are left blank, fall back to sensible defaults
+    meta_title = body.meta_title or body.title
+    canonical_url = body.canonical_url or f"https://truecreds.in/blog/{body.slug}"
+    meta_description = body.meta_description or body.excerpt
     post = {
         "id": str(uuid.uuid4()), "title": body.title, "slug": body.slug,
         "excerpt": body.excerpt, "content": body.content, "category": body.category,
         "cover_image": body.cover_image, "read_time": body.read_time, "status": body.status,
+        "meta_title": meta_title, "meta_description": meta_description,
+        "canonical_url": canonical_url, "author": body.author,
         "source": "local",
         "published_at": datetime.now(timezone.utc).isoformat(),
         "updated_at": datetime.now(timezone.utc).isoformat(),
