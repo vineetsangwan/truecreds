@@ -1454,7 +1454,7 @@ export default function Home() {
       </div>
 
       {/* ── TRUST BAR ── */}
-      <Section>
+      <div>
         <div
           style={{
             background: "#fff",
@@ -1509,7 +1509,7 @@ export default function Home() {
             </div>
           </div>
         </div>
-      </Section>
+      </div>
 
       {/* ── 2. TOP LOAN APPS ── */}
       <Section
