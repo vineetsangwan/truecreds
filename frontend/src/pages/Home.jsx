@@ -1462,6 +1462,9 @@ export default function Home() {
             borderBottom: "1px solid rgba(21,101,192,0.1)",
             padding: "14px 0",
             overflowX: "auto",
+            width: "100vw",
+            marginLeft: "calc(50% - 50vw)",
+            marginRight: "calc(50% - 50vw)",
           }}
         >
           <div className="max-w-7xl mx-auto home-pad">
