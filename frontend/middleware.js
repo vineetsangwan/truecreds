@@ -1,21 +1,23 @@
 // middleware.js — Vercel Edge Middleware
 //
-// Runs at Vercel's edge, before the SPA's static HTML is served.
-// Fixes the "wrong title on Google" issue by rewriting <title>, meta
-// description, and OG tags directly in the HTML using real data from
-// the Railway backend. Works for every blog post automatically.
-//
-// IMPORTANT: This file must live at the ROOT of the directory Vercel
-// builds (same level as package.json, index.html, vercel.json) —
-// i.e. frontend/middleware.js, NOT inside src/.
+// Handles two things:
+// 1. Blog posts (/blog/:slug) — full title/description/OG rewrite using real
+//    post data from the backend (as before).
+// 2. ALL other pages — fixes the canonical URL + og:url to match the actual
+//    page being requested, instead of every page inheriting the static
+//    homepage canonical from index.html. This was making Google treat every
+//    page (e.g. /calculator) as a duplicate of the homepage.
 
-const API_BASE = "https://api.truecreds.in"; // ← replace with your actual Railway backend URL
+const API_BASE = "https://api.truecreds.in";
 const SITE_URL = "https://www.truecreds.in";
 const SITE_NAME = "TrueCreds";
 const DEFAULT_OG_IMAGE = `${SITE_URL}/default-og-image.jpg`;
 
 export const config = {
-  matcher: "/blog/:slug*",
+  // Match everything except API routes, static assets, and Vercel internals
+  matcher: [
+    "/((?!api/|_next/|_vercel/|favicon|apple-touch-icon|robots.txt|sitemap.xml|.*\\.(?:js|css|png|jpg|jpeg|svg|webp|gif|ico|woff|woff2|ttf|map)$).*)",
+  ],
 };
 
 function escapeHtml(str) {
@@ -28,70 +30,65 @@ function escapeHtml(str) {
 
 export default async function middleware(request) {
   const url = new URL(request.url);
-  const match = url.pathname.match(/^\/blog\/([^/]+)\/?$/);
-
-  // Fetch the original response from Vercel's origin/cache.
-  // This does NOT re-trigger the middleware — it's a documented
-  // Vercel pattern for reading+rewriting the response body.
   const response = await fetch(request);
-
-  if (!match) {
-    return response;
-  }
 
   const contentType = response.headers.get("content-type") || "";
   if (!contentType.includes("text/html")) {
     return response;
   }
 
-  const slug = match[1];
-
-  let post = null;
-  try {
-    const apiRes = await fetch(`${API_BASE}/api/blog/posts/${slug}`);
-    if (apiRes.ok) {
-      post = await apiRes.json();
-    }
-  } catch (err) {
-    return response; // backend unreachable — serve default SPA shell
-  }
-
-  if (!post || !post.title) {
-    return response; // post not found — let the SPA handle its own 404
-  }
-
-  const title = escapeHtml(`${post.title} | ${SITE_NAME}`);
-  const description = escapeHtml(
-    post.meta_description || post.excerpt || post.title || ""
-  );
-  const canonical = `${SITE_URL}/blog/${slug}`;
-  const image = post.cover_image || DEFAULT_OG_IMAGE;
+  const canonical = `${SITE_URL}${url.pathname === "/" ? "" : url.pathname}`;
+  const blogMatch = url.pathname.match(/^\/blog\/([^/]+)\/?$/);
 
   let html = await response.text();
 
-  html = html.replace(/<title>[^<]*<\/title>/, `<title>${title}</title>`);
+  // ── Case 1: Blog post — fetch real title/description from backend ──
+  if (blogMatch) {
+    const slug = blogMatch[1];
+    let post = null;
+    try {
+      const apiRes = await fetch(`${API_BASE}/api/blog/posts/${slug}`);
+      if (apiRes.ok) {
+        post = await apiRes.json();
+      }
+    } catch (err) {
+      post = null;
+    }
+
+    if (post && post.title) {
+      const title = escapeHtml(`${post.title} | ${SITE_NAME}`);
+      const description = escapeHtml(
+        post.meta_description || post.excerpt || post.title || ""
+      );
+      const image = post.cover_image || DEFAULT_OG_IMAGE;
+
+      html = html.replace(/<title>[^<]*<\/title>/, `<title>${title}</title>`);
+      html = html.replace(
+        /(<meta name="description" content=")[^"]*(")/,
+        `$1${description}$2`
+      );
+      html = html.replace(
+        /(<meta property="og:title" content=")[^"]*(")/,
+        `$1${title}$2`
+      );
+      html = html.replace(
+        /(<meta property="og:description" content=")[^"]*(")/,
+        `$1${description}$2`
+      );
+      html = html.replace(
+        /(<meta property="og:image" content=")[^"]*(")/,
+        `$1${escapeHtml(image)}$2`
+      );
+    }
+  }
+
+  // ── Case 2: ALL pages — fix canonical + og:url to match the actual page ──
   html = html.replace(
-    /(<meta name="description" content=")[^"]*(")/,
-    `$1${description}$2`
-  );
-  html = html.replace(
-    /(<meta property="og:title" content=")[^"]*(")/,
-    `$1${title}$2`
-  );
-  html = html.replace(
-    /(<meta property="og:description" content=")[^"]*(")/,
-    `$1${description}$2`
-  );
-  html = html.replace(
-    /(<meta property="og:image" content=")[^"]*(")/,
-    `$1${escapeHtml(image)}$2`
-  );
-  html = html.replace(
-    /(<meta property="og:url" content=")[^"]*(")/,
+    /(<link rel="canonical" href=")[^"]*(")/,
     `$1${escapeHtml(canonical)}$2`
   );
   html = html.replace(
-    /(<link rel="canonical" href=")[^"]*(")/,
+    /(<meta property="og:url" content=")[^"]*(")/,
     `$1${escapeHtml(canonical)}$2`
   );
 
@@ -99,4 +96,4 @@ export default async function middleware(request) {
     status: response.status,
     headers: response.headers,
   });
-  }
+}
