@@ -10,7 +10,7 @@
 // directory Cloudflare Pages builds from) as `functions/_middleware.js`,
 // NOT inside `src/` or `dist/`. Cloudflare auto-detects it on deploy.
 
-const API_BASE = "https://YOUR-BACKEND.onrender.com"; // ← replace with your actual Render API URL
+const API_BASE = "https://api.truecreds.in";// ← replace with your actual Render API URL
 const SITE_URL = "https://truecreds.in"; // ← replace if needed
 const SITE_NAME = "TrueCreds";
 const DEFAULT_OG_IMAGE = `${SITE_URL}/default-og-image.jpg`;
