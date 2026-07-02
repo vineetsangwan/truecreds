@@ -317,8 +317,17 @@ export default function BlogPost() {
   return (
     <PageTransition>
       <style>{`
+        /* --site-pad mirrors the navbar's Tailwind padding scale exactly (px-4 sm:px-6 lg:px-8)
+           so every container on this page — header, main layout, related articles — stays
+           pixel-aligned with the navbar at every breakpoint, not just on mobile. */
         :root {
           --site-pad: 16px;
+        }
+        @media (min-width: 640px) {
+          :root { --site-pad: 24px; }
+        }
+        @media (min-width: 1024px) {
+          :root { --site-pad: 32px; }
         }
 
         .bp-content { color: #334155; font-size: 16px; line-height: 1.85; }
@@ -457,7 +466,11 @@ export default function BlogPost() {
         }}
       >
         <div
-          style={{ maxWidth: "1180px", margin: "0 auto", padding: "0 20px" }}
+          style={{
+            maxWidth: "1180px",
+            margin: "0 auto",
+            padding: "0 var(--site-pad)",
+          }}
         >
           {/* Breadcrumb */}
           <div
@@ -575,7 +588,7 @@ export default function BlogPost() {
           style={{
             maxWidth: "1180px",
             margin: "0 auto",
-            padding: "0 20px",
+            padding: "0 var(--site-pad)",
             overflowX: "hidden",
           }}
         >
@@ -787,7 +800,11 @@ export default function BlogPost() {
       {related.length > 0 && (
         <div style={{ background: "#F0F6FF", padding: "48px 0 64px" }}>
           <div
-            style={{ maxWidth: "1180px", margin: "0 auto", padding: "0 20px" }}
+            style={{
+              maxWidth: "1180px",
+              margin: "0 auto",
+              padding: "0 var(--site-pad)",
+            }}
           >
             <h2
               style={{
