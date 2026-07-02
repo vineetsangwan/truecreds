@@ -7,6 +7,9 @@ from typing import Optional, List
 from datetime import datetime, timezone, timedelta
 import jwt, uuid, os, asyncio, logging, re, time, html as htmllib, base64
 from dotenv import load_dotenv
+import cloudinary
+import cloudinary.uploader
+
 
 load_dotenv()
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
@@ -34,6 +37,13 @@ WP_ACTIVE          = os.getenv("WP_ACTIVE", "false").lower() == "true"
 client = AsyncIOMotorClient(MONGO_URL)
 db = client[DB_NAME]
 security = HTTPBearer(auto_error=False)
+
+cloudinary.config(
+    cloud_name=os.getenv("CLOUDINARY_CLOUD_NAME"),
+    api_key=os.getenv("CLOUDINARY_API_KEY"),
+    api_secret=os.getenv("CLOUDINARY_API_SECRET"),
+    secure=True,
+)
 
 # ─── MODELS ───────────────────────────────────────────────────────────────────
 
@@ -262,6 +272,11 @@ async def send_lead_notification(lead: dict):
         logger.error(f"Email failed: {e}")
 
 # ─── IMAGE UPLOAD HELPER ──────────────────────────────────────────────────────
+# NOTE: process_image_upload (base64) is no longer used by the upload endpoint
+# below — kept only in case anything else still references it. The active
+# upload path now goes through Cloudinary, which returns a small hosted URL
+# instead of embedding the full image data inline. This is what was causing
+# slow blog page loads.
 
 async def process_image_upload(file: UploadFile, max_mb: int = 3) -> str:
     """Validates, reads and returns base64 data URL. Raises HTTPException on error."""
@@ -482,21 +497,44 @@ async def get_wp_categories(u: str = Depends(verify_token)):
         return []
 
 # ─── ADMIN: IMAGE UPLOAD ──────────────────────────────────────────────────────
+# Uploads now go to Cloudinary and store only a small URL — not base64 —
+# which is what was bloating API responses and slowing down blog pages.
 
 @app.post("/api/admin/upload-image")
 async def upload_image(file: UploadFile = File(...), u: str = Depends(verify_token)):
     """Upload image from device — used for both blog thumbnail and inline images."""
-    data_url = await process_image_upload(file, max_mb=3)
+    allowed_types = ["image/jpeg", "image/png", "image/webp", "image/gif"]
+    if file.content_type not in allowed_types:
+        raise HTTPException(400, "Only JPEG, PNG, WebP and GIF images are allowed")
+
+    contents = await file.read()
+    if len(contents) > 10 * 1024 * 1024:
+        raise HTTPException(400, "Image must be under 10MB")
+
+    try:
+        result = cloudinary.uploader.upload(
+            contents,
+            folder="truecreds_blog",
+            resource_type="image",
+            transformation=[
+                {"width": 1600, "height": 1600, "crop": "limit"},
+                {"quality": "auto", "fetch_format": "auto"},
+            ],
+        )
+    except Exception as e:
+        raise HTTPException(500, f"Upload failed: {str(e)}")
+
     img_doc = {
         "id": str(uuid.uuid4()),
         "filename": file.filename,
         "content_type": file.content_type,
-        "data_url": data_url,
+        "url": result["secure_url"],
+        "public_id": result["public_id"],
         "uploaded_at": datetime.now(timezone.utc).isoformat(),
     }
     await db.images.insert_one(img_doc)
     img_doc.pop("_id", None)
-    return {"success": True, "url": data_url, "id": img_doc["id"], "filename": file.filename}
+    return {"success": True, "url": result["secure_url"], "id": img_doc["id"], "filename": file.filename}
 
 # ─── ADMIN: BLOG CRUD ─────────────────────────────────────────────────────────
 
@@ -509,7 +547,6 @@ async def admin_get_blog_posts(u: str = Depends(verify_token)):
 async def admin_create_blog_post(body: BlogPostCreate, u: str = Depends(verify_token)):
     existing = await db.blog_posts.find_one({"slug": body.slug})
     if existing: raise HTTPException(400, "A post with this slug already exists")
-    # If meta_title/canonical_url are left blank, fall back to sensible defaults
     meta_title = body.meta_title or body.title
     canonical_url = body.canonical_url or f"https://truecreds.in/blog/{body.slug}"
     meta_description = body.meta_description or body.excerpt
