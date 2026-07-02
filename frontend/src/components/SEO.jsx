@@ -22,7 +22,7 @@
 
 import { Helmet } from "react-helmet-async";
 
-const SITE_URL = "https://www.truecreds.in";
+const SITE_URL = "https://www.truecreds.in/";
 const SITE_NAME = "TrueCreds";
 const DEFAULT_OG_IMAGE = `${SITE_URL}/default-og-image.jpg`;
 const DEFAULT_DESCRIPTION =
