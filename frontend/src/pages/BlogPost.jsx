@@ -318,7 +318,7 @@ export default function BlogPost() {
     <PageTransition>
       <style>{`
         :root {
-          --site-pad: 8px;
+          --site-pad: 2px;
         }
 
         .bp-content { color: #334155; font-size: 16px; line-height: 1.85; }
