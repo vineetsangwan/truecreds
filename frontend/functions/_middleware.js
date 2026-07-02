@@ -1,17 +1,9 @@
-// functions/_middleware.js
-//
-// Cloudflare Pages Function — runs at the edge, BEFORE the React app loads.
-// Fixes the "wrong title on Google" issue permanently by rewriting <title>,
-// meta description, and OG tags directly in the raw HTML response using
-// real data from the FastAPI backend. Works for every blog post automatically —
-// no per-page code needed going forward.
-//
-// IMPORTANT: This file must live at the ROOT of your repo (or the root of the
-// directory Cloudflare Pages builds from) as `functions/_middleware.js`,
-// NOT inside `src/` or `dist/`. Cloudflare auto-detects it on deploy.
+// functions/_middleware.js — DEBUG VERSION
+// Adds x-mw-debug header so we can see exactly which branch executes.
+// Once the issue is found, we'll switch back to the clean version.
 
-const API_BASE = "https://api.truecreds.in";// ← replace with your actual Render API URL
-const SITE_URL = "https://truecreds.in"; // ← replace if needed
+const API_BASE = "https://api.truecreds.in";
+const SITE_URL = "https://truecreds.in";
 const SITE_NAME = "TrueCreds";
 const DEFAULT_OG_IMAGE = `${SITE_URL}/default-og-image.jpg`;
 
@@ -19,41 +11,47 @@ export async function onRequest(context) {
   const { request, next } = context;
   const url = new URL(request.url);
 
-  // Only intercept blog post detail pages: /blog/:slug
   const blogMatch = url.pathname.match(/^\/blog\/([^/]+)\/?$/);
 
   if (!blogMatch) {
-    return next(); // everything else passes through untouched
+    const resp = await next();
+    return resp;
   }
 
   const slug = blogMatch[1];
-
-  // Get the normal SPA HTML shell first
   const response = await next();
   const contentType = response.headers.get("content-type") || "";
+
   if (!contentType.includes("text/html")) {
-    return response; // not HTML (e.g. asset request) — skip
+    const resp = new Response(response.body, response);
+    resp.headers.set("x-mw-debug", "not-html:" + contentType);
+    return resp;
   }
 
-  // Fetch the real post data from your backend
   let post = null;
+  let debugMsg = "";
   try {
     const apiRes = await fetch(`${API_BASE}/api/blog/posts/${slug}`);
+    debugMsg = "api-status:" + apiRes.status;
     if (apiRes.ok) {
       post = await apiRes.json();
+      debugMsg += ";has-title:" + (!!post && !!post.title);
     }
   } catch (err) {
-    // Backend unreachable — fail gracefully, serve default SPA shell
-    return response;
+    debugMsg = "fetch-error:" + err.message;
+    const resp = new Response(response.body, response);
+    resp.headers.set("x-mw-debug", debugMsg);
+    return resp;
   }
 
   if (!post || !post.title) {
-    return response; // post not found — let the SPA handle its own 404
+    const resp = new Response(response.body, response);
+    resp.headers.set("x-mw-debug", "no-post-or-title;" + debugMsg);
+    return resp;
   }
 
   const title = `${post.title} | ${SITE_NAME}`;
-  const description =
-    post.meta_description || post.excerpt || post.title || "";
+  const description = post.meta_description || post.excerpt || post.title || "";
   const canonical = `${SITE_URL}/blog/${slug}`;
   const image = post.cover_image || DEFAULT_OG_IMAGE;
 
@@ -94,5 +92,8 @@ export async function onRequest(context) {
       },
     });
 
-  return rewriter.transform(response);
+  const transformed = rewriter.transform(response);
+  const finalResp = new Response(transformed.body, transformed);
+  finalResp.headers.set("x-mw-debug", "success;" + debugMsg);
+  return finalResp;
 }
