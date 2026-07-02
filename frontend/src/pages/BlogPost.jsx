@@ -457,7 +457,7 @@ export default function BlogPost() {
         }}
       >
         <div
-          style={{ maxWidth: "1180px", margin: "0 auto", padding: "0 20px" }}
+          style={{ maxWidth: "1400px", margin: "0 auto", padding: "0 20px" }}
         >
           {/* Breadcrumb */}
           <div
@@ -573,7 +573,7 @@ export default function BlogPost() {
         <div
           className="bp-outer-pad"
           style={{
-            maxWidth: "1180px",
+            maxWidth: "1400px",
             margin: "0 auto",
             padding: "0 20px",
             overflowX: "hidden",
@@ -787,7 +787,7 @@ export default function BlogPost() {
       {related.length > 0 && (
         <div style={{ background: "#F0F6FF", padding: "48px 0 64px" }}>
           <div
-            style={{ maxWidth: "1180px", margin: "0 auto", padding: "0 20px" }}
+            style={{ maxWidth: "1400px", margin: "0 auto", padding: "0 20px" }}
           >
             <h2
               style={{
