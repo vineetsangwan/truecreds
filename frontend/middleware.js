@@ -2,11 +2,15 @@
 //
 // Handles two things:
 // 1. Blog posts (/blog/:slug) — full title/description/OG rewrite using real
-//    post data from the backend (as before).
+//    post data from the backend.
 // 2. ALL other pages — fixes the canonical URL + og:url to match the actual
 //    page being requested, instead of every page inheriting the static
-//    homepage canonical from index.html. This was making Google treat every
-//    page (e.g. /calculator) as a duplicate of the homepage.
+//    homepage canonical from index.html.
+//
+// NOTE: filtering is done INSIDE the function (not via matcher regex) —
+// Vercel's generic Edge Middleware (non-Next.js) doesn't reliably support
+// complex matcher regex like negative lookaheads. A broad matcher + manual
+// checks is more robust.
 
 const API_BASE = "https://api.truecreds.in";
 const SITE_URL = "https://www.truecreds.in";
@@ -14,11 +18,19 @@ const SITE_NAME = "TrueCreds";
 const DEFAULT_OG_IMAGE = `${SITE_URL}/default-og-image.jpg`;
 
 export const config = {
-  // Match everything except API routes, static assets, and Vercel internals
-  matcher: [
-    "/((?!api/|_next/|_vercel/|favicon|apple-touch-icon|robots.txt|sitemap.xml|.*\\.(?:js|css|png|jpg|jpeg|svg|webp|gif|ico|woff|woff2|ttf|map)$).*)",
-  ],
+  matcher: "/:path*",
 };
+
+const SKIP_EXTENSIONS = [
+  ".js", ".css", ".png", ".jpg", ".jpeg", ".svg", ".webp", ".gif",
+  ".ico", ".woff", ".woff2", ".ttf", ".map", ".json", ".xml", ".txt",
+];
+
+function shouldSkip(pathname) {
+  if (pathname.startsWith("/api/")) return true;
+  if (SKIP_EXTENSIONS.some((ext) => pathname.endsWith(ext))) return true;
+  return false;
+}
 
 function escapeHtml(str) {
   return String(str)
@@ -30,8 +42,12 @@ function escapeHtml(str) {
 
 export default async function middleware(request) {
   const url = new URL(request.url);
-  const response = await fetch(request);
 
+  if (shouldSkip(url.pathname)) {
+    return fetch(request);
+  }
+
+  const response = await fetch(request);
   const contentType = response.headers.get("content-type") || "";
   if (!contentType.includes("text/html")) {
     return response;
