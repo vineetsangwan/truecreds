@@ -99,4 +99,4 @@ export default async function middleware(request) {
     status: response.status,
     headers: response.headers,
   });
-}
+  }
