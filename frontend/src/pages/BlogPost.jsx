@@ -1,9 +1,14 @@
 import PageTransition from "../components/PageTransition";
 import React, { useEffect, useState, useRef } from "react";
 import { Link, useParams } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import { motion } from "framer-motion";
 import { api } from "../lib/api";
 import EligibilityForm from "../components/EligibilityForm";
+
+const SITE_URL = "https://www.truecreds.in";
+const SITE_NAME = "TrueCreds";
+const DEFAULT_OG_IMAGE = `${SITE_URL}/default-og-image.jpg`;
 
 function ShareButtons({ title }) {
   const url = typeof window !== "undefined" ? window.location.href : "";
@@ -314,8 +319,24 @@ export default function BlogPost() {
 
   const contentHtml = markdownToHtml(post.content);
 
+  const seoTitle = `${post.title} | ${SITE_NAME}`;
+  const seoDescription =
+    post.meta_description || post.excerpt || post.title || "";
+  const seoCanonical = `${SITE_URL}/blog/${slug}`;
+  const seoImage = post.cover_image || DEFAULT_OG_IMAGE;
+
   return (
     <PageTransition>
+      <Helmet>
+        <title>{seoTitle}</title>
+        <meta name="description" content={seoDescription} />
+        <meta property="og:type" content="article" />
+        <meta property="og:title" content={seoTitle} />
+        <meta property="og:description" content={seoDescription} />
+        <meta property="og:image" content={seoImage} />
+        <meta property="og:url" content={seoCanonical} />
+        <link rel="canonical" href={seoCanonical} />
+      </Helmet>
       <style>{`
         :root {
           --site-pad: 2px;
